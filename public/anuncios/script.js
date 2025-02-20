@@ -1,5 +1,145 @@
-// Define MASTER_URL at the very top before any other code
 const MASTER_URL = 'https://master-teste.vercel.app';
+
+// Global variable for selected products
+window.selectedProducts = [];
+
+// Product selection functions
+window.toggleProductSelection = function(product) {
+    const index = window.selectedProducts.findIndex(p => p._id === product._id);
+    const card = document.querySelector(`.card[data-product-id="${product._id}"]`);
+    
+    if (index > -1) {
+        // Remove product if already selected
+        window.selectedProducts.splice(index, 1);
+        if (card) card.classList.remove('selected');
+    } else if (window.selectedProducts.length < 2) {
+        // Add product if less than 2 are selected
+        window.selectedProducts.push(product);
+        if (card) card.classList.add('selected');
+    } else {
+        alert('Você só pode selecionar 2 produtos!');
+        return;
+    }
+    
+    updateSelectedCount();
+};
+
+function updateSelectedCount() {
+    const countElement = document.getElementById('selectedCount');
+    if (countElement) {
+        countElement.textContent = window.selectedProducts.length;
+    }
+}
+
+window.confirmProductSelection = function() {
+    if (window.selectedProducts.length !== 2) {
+        alert('Por favor, selecione exatamente 2 produtos antes de confirmar.');
+        return;
+    }
+
+    const [product1, product2] = window.selectedProducts;
+    
+    // Update form fields with selected products
+    document.getElementById('product1Title').value = product1.name || '';
+    document.getElementById('product1Description').value = product1.description || '';
+    document.getElementById('product1Price').value = product1.price || '';
+    if (document.getElementById('product1Image')) {
+        document.getElementById('product1Image').dataset.imageUrl = product1.imageUrl || '';
+    }
+
+    document.getElementById('product2Title').value = product2.name || '';
+    document.getElementById('product2Description').value = product2.description || '';
+    document.getElementById('product2Price').value = product2.price || '';
+    if (document.getElementById('product2Image')) {
+        document.getElementById('product2Image').dataset.imageUrl = product2.imageUrl || '';
+    }
+
+    // Update preview
+    const selectedProductsDiv = document.getElementById('selectedProducts');
+    if (selectedProductsDiv) {
+        selectedProductsDiv.innerHTML = `
+            <div class="row">
+                <div class="col-6">
+                    <div class="card mb-3">
+                        <img src="${product1.imageUrl || `${MASTER_URL}/default-product.png`}" 
+                             class="card-img-top p-2" alt="${product1.name}">
+                        <div class="card-body">
+                            <h6 class="card-title">${product1.name}</h6>
+                            <p class="card-text text-primary">${product1.price}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card mb-3">
+                        <img src="${product2.imageUrl || `${MASTER_URL}/default-product.png`}" 
+                             class="card-img-top p-2" alt="${product2.name}">
+                        <div class="card-body">
+                            <h6 class="card-title">${product2.name}</h6>
+                            <p class="card-text text-primary">${product2.price}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('productSelectionModal'));
+    if (modal) {
+        modal.hide();
+    }
+};
+
+// Update loadModalProducts function
+async function loadModalProducts() {
+    try {
+        const productsContainer = document.getElementById('productsListContainer');
+        if (!productsContainer) return;
+
+        productsContainer.innerHTML = '<div class="text-center">Carregando produtos...</div>';
+
+        const response = await fetch(`${MASTER_URL}/api/products`);
+        const data = await response.json();
+        
+        if (data.success) {
+            productsContainer.innerHTML = `
+                <div class="row g-3">
+                    ${data.products.map(product => `
+                        <div class="col-md-3">
+                            <div class="card h-100 ${window.selectedProducts.find(p => p._id === product._id) ? 'selected' : ''}"
+                                 data-product-id="${product._id}"
+                                 onclick="toggleProductSelection(${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                                <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
+                                     class="card-img-top p-2" alt="${product.name}">
+                                <div class="card-body">
+                                    <h6 class="card-title">${product.name}</h6>
+                                    <p class="card-text text-primary">${product.price}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        updateSelectedCount();
+        
+    } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+        if (productsContainer) {
+            productsContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar produtos</div>';
+        }
+    }
+}
+
+// Update openProductSelectionModal function
+window.openProductSelectionModal = async function() {
+    window.selectedProducts = []; // Reset selection
+    const modal = new bootstrap.Modal(document.getElementById('productSelectionModal'));
+    await loadModalProducts();
+    updateSelectedCount();
+    modal.show();
+};
 
 // Initialize empty arrays and variables
 window.ads = [];
