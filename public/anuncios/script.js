@@ -1,7 +1,132 @@
+// Define MASTER_URL at the very top before any other code
+const MASTER_URL = 'https://master-teste.vercel.app';
+
+// Initialize empty arrays and variables
+window.ads = [];
+window.currentSlide = 0;
+window.selectedProducts = [];
+
+// Add safe DOM manipulation helper
+function getElement(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+        console.warn(`Element with id "${id}" not found`);
+    }
+    return element;
+}
+
+// Update toggleProduct function with null checks
+function toggleProduct(number) {
+    const content = getElement(`product-content-${number}`);
+    const icon = getElement(`toggle-icon-${number}`);
+    
+    if (!content || !icon) {
+        console.warn('Required elements for toggleProduct not found');
+        return;
+    }
+    
+    content.style.display = content.style.display === 'block' ? 'none' : 'block';
+    icon.classList.toggle('expanded');
+}
+
+// Update event listener initialization
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        // Initialize product selection elements
+        const addAdButton = getElement('addAd');
+        const saveAdButton = getElement('saveAd');
+        const backgroundSelect = getElement('backgroundSelect');
+        const searchByCategory = getElement('searchByCategory');
+
+        if (addAdButton) {
+            addAdButton.addEventListener('click', handleAddAd);
+        }
+
+        if (saveAdButton) {
+            saveAdButton.addEventListener('click', handleSaveAd);
+        }
+
+        if (searchByCategory) {
+            searchByCategory.addEventListener('input', handleCategorySearch);
+        }
+
+        // Load initial data
+        await Promise.all([
+            loadExistingProducts(),
+            loadSavedAds()
+        ]);
+
+        // Initialize product sections if they exist
+        const productSections = document.querySelectorAll('.product-section');
+        if (productSections.length > 0) {
+            toggleProduct(1);
+        }
+
+        // Initialize ad type
+        toggleAdType('twoProducts');
+
+    } catch (error) {
+        console.error('Error during initialization:', error);
+    }
+});
+
+// ...existing code...
+
+// Update loadExistingProducts function with better error handling
+async function loadExistingProducts() {
+    try {
+        const response = await fetch(`${MASTER_URL}/api/products`);
+        const data = await response.json();
+        
+        if (data.success && data.products) {
+            const allProducts = data.products;
+            
+            // Update product selects if they exist
+            const product1Select = getElement('product1Select');
+            const product2Select = getElement('product2Select');
+            
+            const options = allProducts.map(product => 
+                `<option value="${product.id}">${product.name}</option>`
+            ).join('');
+            
+            const defaultOption = '<option value="">Selecione um produto</option>';
+            
+            if (product1Select) {
+                product1Select.innerHTML = defaultOption + options;
+            }
+            if (product2Select) {
+                product2Select.innerHTML = defaultOption + options;
+            }
+            
+            return allProducts;
+        }
+        return [];
+    } catch (error) {
+        console.error('Error loading products:', error);
+        return [];
+    }
+}
+
+// ...existing code...
+
+// Update modal initialization
+window.openProductSelectionModal = async function() {
+    const modalElement = getElement('productSelectionModal');
+    if (!modalElement) {
+        console.error('Product selection modal not found');
+        return;
+    }
+
+    window.selectedProducts = []; // Reset selection
+    const modal = new bootstrap.Modal(modalElement);
+    await loadModalProducts();
+    updateSelectedCount();
+    modal.show();
+};
+
 // Initialize window.ads and global variables at the top
 window.ads = [];
 window.currentSlide = 0;
-const MASTER_URL = 'https://master-teste.vercel.app'; // Single declaration
 
 document.addEventListener("DOMContentLoaded", async () => {
     // Check if slideIntervalInput exists before using it
@@ -2492,4 +2617,4 @@ async function loadModalProducts() {
     }
 }
 
-// ...existing code...
+// ...
