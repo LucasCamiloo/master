@@ -86,7 +86,7 @@
     /* Seções de Formulário */
     .form-section {
         background: var(--light-bg);
-        border-radius: var(--border-radius);
+        border-radius: var (--border-radius);
         padding: var(--spacing-lg);
         margin-bottom: var(--spacing-lg);
         border: 1px solid rgba(0,0,0,0.1);
@@ -613,6 +613,43 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeAndClearModal()">Cancelar</button>
                 <button type="button" class="btn btn-primary" onclick="handleSaveAndClose()">Salvar</button>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Modal para seleção de produtos -->
+  <div class="modal fade" id="productSelectionModal" tabindex="-1" aria-labelledby="productSelectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productSelectionModalLabel">Selecionar Produtos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col">
+                        <input type="text" id="productSearchModal" class="form-control" placeholder="Buscar produtos...">
+                    </div>
+                    <div class="col">
+                        <select id="categoryFilterModal" class="form-select">
+                            <option value="">Todas as categorias</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="products-grid" id="productsGridModal">
+                    <!-- Produtos serão carregados aqui -->
+                </div>
+                <div class="selected-products-preview mt-3">
+                    <h6>Produtos Selecionados:</h6>
+                    <div id="selectedProductsPreview" class="d-flex gap-2">
+                        <!-- Produtos selecionados serão mostrados aqui -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmProductSelection">Confirmar Seleção</button>
             </div>
         </div>
     </div>
