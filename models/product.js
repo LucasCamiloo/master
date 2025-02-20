@@ -22,7 +22,14 @@ const productSchema = new mongoose.Schema({
     imageUrl: {
         type: String,
         default: null
-    }
+    },
+    category: {
+        type: String,
+        required: true
+    },
+    tags: [{
+        type: String
+    }]
 }, { 
     timestamps: true,
     toJSON: { virtuals: true },
