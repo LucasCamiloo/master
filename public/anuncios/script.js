@@ -3,26 +3,7 @@ const MASTER_URL = 'https://master-teste.vercel.app';
 // Global variable for selected products
 window.selectedProducts = [];
 
-// Product selection functions
-window.toggleProductSelection = function(product) {
-    const index = window.selectedProducts.findIndex(p => p._id === product._id);
-    const card = document.querySelector(`.card[data-product-id="${product._id}"]`);
-    
-    if (index > -1) {
-        // Remove product if already selected
-        window.selectedProducts.splice(index, 1);
-        if (card) card.classList.remove('selected');
-    } else if (window.selectedProducts.length < 2) {
-        // Add product if less than 2 are selected
-        window.selectedProducts.push(product);
-        if (card) card.classList.add('selected');
-    } else {
-        alert('Você só pode selecionar 2 produtos!');
-        return;
-    }
-    
-    updateSelectedCount();
-};
+
 
 function updateSelectedCount() {
     const countElement = document.getElementById('selectedCount');
@@ -33,7 +14,20 @@ function updateSelectedCount() {
 
 window.confirmProductSelection = function() {
     if (window.selectedProducts.length !== 2) {
-        alert('Por favor, selecione exatamente 2 produtos antes de confirmar.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Seleção incompleta',
+            text: 'Por favor selecione exatamente 2 produtos'
+        });
+        return;
+    }
+ const container = document.getElementById('selectedProducts');
+    if (!container) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro técnico',
+            text: 'Elemento de exibição não encontrado'
+        });
         return;
     }
 
@@ -2477,22 +2471,39 @@ async function loadProductsGrid() {
         console.error('Erro ao carregar produtos:', error);
     }
 }
-
 window.toggleProductSelection = function(product) {
-    const index = selectedProducts.findIndex(p => p.id === product.id);
+    const index = window.selectedProducts.findIndex(p => p._id === product._id);
+    const card = document.querySelector(`.card[data-product-id="${product._id}"]`);
     
     if (index > -1) {
-        selectedProducts.splice(index, 1);
-    } else if (selectedProducts.length < 2) {
-        selectedProducts.push(product);
+        window.selectedProducts.splice(index, 1);
+        if (card) card.classList.remove('selected');
+    } else if (window.selectedProducts.length < 2) {
+        window.selectedProducts.push(product);
+        if (card) card.classList.add('selected');
     } else {
         alert('Você só pode selecionar 2 produtos!');
         return;
     }
-    
-    updateProductCards();
-    updateSelectedCount();
+    updateSelectedProductsPreview(); 
+    updateSelectedCount(); // Essa função parece estar atualizando apenas o contador
 };
+function updateSelectedProductsPreview() {
+    const container = document.getElementById('selectedProducts');
+    container.innerHTML = window.selectedProducts.map(product => `
+        <div class="col-6">
+            <div class="card mb-3">
+                <img src="${product.imageUrl}" class="card-img-top" alt="${product.name}">
+                <div class="card-body">
+                    <h6>${product.name}</h6>
+                    <p>${product.price}</p>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+
 
 function updateProductCards() {
     document.querySelectorAll('.product-card').forEach(card => {
@@ -2505,31 +2516,6 @@ function updateSelectedCount() {
     document.getElementById('selectedCount').textContent = selectedProducts.length;
 }
 
-window.confirmProductSelection = function() {
-    if (selectedProducts.length !== 2) {
-        alert('Por favor, selecione exatamente 2 produtos.');
-        return;
-    }
-
-    // Atualizar preview dos produtos selecionados
-    const selectedProductsDiv = document.getElementById('selectedProducts');
-    selectedProductsDiv.innerHTML = selectedProducts.map(product => `
-        <div class="col-6">
-            <div class="card mb-3">
-                <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
-                     class="card-img-top p-2" alt="${product.name}">
-                <div class="card-body">
-                    <h6 class="card-title">${product.name}</h6>
-                    <p class="card-text text-primary">${product.price}</p>
-                </div>
-            </div>
-        </div>
-    `).join('');
-
-    // Fechar modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('productSelectionModal'));
-    modal.hide();
-};
 
 // Adicionar pesquisa em tempo real
 document.getElementById('productSearchInput')?.addEventListener('input', function(e) {
@@ -2663,55 +2649,7 @@ document.getElementById('searchByCategory').addEventListener('input', function(e
     });
 });
 
-// Atualizar função de seleção de produto
-window.toggleProductSelection = function(product) {
-    const index = selectedProducts.findIndex(p => p._id === product._id);
-    const card = document.querySelector(`.product-card[onclick*="${product._id}"]`);
-    const checkbox = card.querySelector('input[type="checkbox"]');
-    
-    if (index > -1) {
-        selectedProducts.splice(index, 1);
-        card.classList.remove('selected');
-        checkbox.checked = false;
-    } else if (selectedProducts.length < 2) {
-        selectedProducts.push(product);
-        card.classList.add('selected');
-        checkbox.checked = true;
-    } else {
-        alert('Você só pode selecionar 2 produtos!');
-        return;
-    }
-    
-    updateSelectedCount();
-};
-
 // ...existing code...
-
-window.confirmProductSelection = function() {
-    if (selectedProducts.length === 0) {
-        alert('Por favor, selecione produtos antes de confirmar.');
-        return;
-    }
-
-    // Atualizar preview dos produtos selecionados
-    const selectedProductsDiv = document.getElementById('selectedProducts');
-    selectedProductsDiv.innerHTML = selectedProducts.map(product => `
-        <div class="col-6">
-            <div class="card mb-3">
-                <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
-                     class="card-img-top p-2" alt="${product.name}">
-                <div class="card-body">
-                    <h6 class="card-title">${product.name}</h6>
-                    <p class="card-text text-primary">${product.price}</p>
-                </div>
-            </div>
-        </div>
-    `).join('');
-
-    // Fechar modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('productSelectionModal'));
-    modal.hide();
-};
 
 // Atualizar a função de carregar produtos no modal
 async function loadModalProducts() {
