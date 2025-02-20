@@ -2058,50 +2058,59 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Adicionar função para abrir modal de seleção
-window.openProductSelectionModal = function(productNumber) {
+window.openProductSelectionModal = function() {
   const modal = new bootstrap.Modal(document.getElementById('productSelectionModal'));
-  // Salvar qual produto estamos selecionando (ex: 1 ou 2) em uma variável global
-  window.selectedProductSlot = productNumber;
-  // Preencher modal com lista de produtos
-  loadModalProducts();
+  loadAllProducts();
   modal.show();
 };
 
-// Função para carregar produtos no container do modal
-async function loadModalProducts() {
+// Carregar todos os produtos e permitir seleção de múltiplos
+async function loadAllProducts() {
   const container = document.getElementById('productsListContainer');
-  const filterValue = document.getElementById('searchByCategory').value.toLowerCase();
-  // ...existing code que obtém produtos da API...
-  // Filtrar por categoria
-  const filteredProducts = data.products.filter(p => p.category.toLowerCase().includes(filterValue));
-  container.innerHTML = filteredProducts.map(p => `
+  // ...existing code de fetch de produtos...
+  container.innerHTML = data.products.map(p => `
     <div class="col-3 mb-3">
-      <div class="card" onclick="selectProduct('${p._id}', '${p.name}', '${p.description}', '${p.price}', '${p.imageUrl}')">
+      <div class="card h-100">
         <img src="${p.imageUrl}" class="card-img-top" alt="${p.name}">
         <div class="card-body">
           <h5 class="card-title">${p.name}</h5>
           <p class="card-text">${p.description}</p>
           <span class="badge bg-primary">${p.price}</span>
         </div>
+        <div class="card-footer">
+          <input type="checkbox" class="product-checkbox" value="${p._id}"
+            data-name="${p.name}" data-description="${p.description}"
+            data-price="${p.price}" data-image="${p.imageUrl}">
+          Selecionar
+        </div>
       </div>
     </div>
   `).join('');
 }
 
-// Escolher produto e fechar modal
-window.selectProduct = function(id, name, description, price, imageUrl) {
-  if (window.selectedProductSlot === 1) {
-    document.getElementById('product1Title').value = name;
-    document.getElementById('product1Description').value = description;
-    document.getElementById('product1Price').value = price;
-    document.getElementById('product1Image').dataset.imageUrl = imageUrl;
-  } else {
-    document.getElementById('product2Title').value = name;
-    document.getElementById('product2Description').value = description;
-    document.getElementById('product2Price').value = price;
-    document.getElementById('product2Image').dataset.imageUrl = imageUrl;
+// Confirmar seleção de até dois produtos
+document.getElementById('confirmSelection').addEventListener('click', () => {
+  const checkboxes = document.querySelectorAll('.product-checkbox:checked');
+  if (checkboxes.length !== 2) {
+    alert('Selecione exatamente 2 produtos antes de confirmar.');
+    return;
   }
-};
+  // Preencher campos de produto 1 e 2
+  const [first, second] = checkboxes;
+  document.getElementById('product1Title').value = first.dataset.name;
+  document.getElementById('product1Description').value = first.dataset.description;
+  document.getElementById('product1Price').value = first.dataset.price;
+  document.getElementById('product1Image').dataset.imageUrl = first.dataset.image;
+
+  document.getElementById('product2Title').value = second.dataset.name;
+  document.getElementById('product2Description').value = second.dataset.description;
+  document.getElementById('product2Price').value = second.dataset.price;
+  document.getElementById('product2Image').dataset.imageUrl = second.dataset.image;
+
+  // Fechar modal
+  const modalEl = document.getElementById('productSelectionModal');
+  if (modalEl) bootstrap.Modal.getInstance(modalEl).hide();
+});
 
 // Fechar modal ao confirmar (poderia fechar automaticamente ao clicar no produto, se preferir)
 document.getElementById('confirmSelection').addEventListener('click', () => {
