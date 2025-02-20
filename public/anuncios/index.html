@@ -580,65 +580,32 @@
     </div>
   </div>
 
-  <!-- Novo modal para escolher produtos -->
-  <div class="modal fade" id="productSelectionModal" tabindex="-1" aria-labelledby="productSelectionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="productSelectionModalLabel">Escolher Produtos</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-        </div>
-        <div class="modal-body">
-          <!-- Área para filtrar por categoria e listar produtos -->
-          <div class="row mb-3">
-            <div class="col">
-              <input type="text" id="searchByCategory" class="form-control" placeholder="Filtrar por Categoria...">
-            </div>
-          </div>
-          <div id="productsListContainer" class="row">
-            <!-- Conteúdo dinâmico carregado via script -->
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button id="confirmSelection" type="button" class="btn btn-primary">Confirmar Seleção</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-<!-- Atualizar o modal de seleção de produtos -->
-<div class="modal fade" id="productSelectionModal" tabindex="-1" aria-labelledby="productSelectionModalLabel" aria-hidden="true">
+<!-- Update the product selection modal -->
+<div class="modal fade" id="productSelectionModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="productSelectionModalLabel">Escolher Produtos</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                <h5 class="modal-title">Selecionar Produtos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="row mb-3">
-                    <div class="col-md-4">
-                        <select id="categorySelect" class="form-select">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="searchByCategory" 
+                               placeholder="Pesquisar produtos...">
+                    </div>
+                    <div class="col-md-6">
+                        <select class="form-select" id="categorySelect">
                             <option value="all">Todas as Categorias</option>
                         </select>
                     </div>
-                    <div class="col-md-8">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-search"></i>
-                            </span>
-                            <input type="text" id="searchByCategory" class="form-control" 
-                                   placeholder="Pesquisar produtos...">
-                        </div>
-                    </div>
                 </div>
-                <div id="productsListContainer">
-                    <!-- Produtos serão carregados aqui -->
+                <div id="productsListContainer" class="row">
+                    <!-- Products will be loaded here -->
                 </div>
             </div>
             <div class="modal-footer">
-                <div class="selected-count me-auto">
-                    Produtos selecionados: <span id="selectedCount">0</span>
-                </div>
+                <span class="me-auto">Produtos selecionados: <span id="selectedCount">0</span>/2</span>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-primary" onclick="confirmProductSelection()">
                     Confirmar Seleção
