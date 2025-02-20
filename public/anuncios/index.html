@@ -159,7 +159,7 @@
     .saved-ad-card {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         background: white;
-        border-radius: var(--border-radius);
+        border-radius: var (--border-radius);
         padding: var(--spacing-md);
         margin-bottom: var(--spacing-md);
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -1295,15 +1295,10 @@
     };
 </script>
 
-<!-- ...existing code... -->
-
-<!-- Remover script duplicado do final e manter apenas este -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        loadExistingProducts();
-        toggleProduct(1);
-        toggleAdType('twoProducts');
-        loadSavedAds();
+        // The initialization is now handled in script.js
+        console.log('DOM loaded');
     });
 </script>
 </body>
