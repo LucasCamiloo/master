@@ -2370,3 +2370,126 @@ window.toggleProductSelection = function(product) {
 };
 
 // ...existing code...
+
+window.confirmProductSelection = function() {
+    if (selectedProducts.length === 0) {
+        alert('Por favor, selecione produtos antes de confirmar.');
+        return;
+    }
+
+    // Atualizar preview dos produtos selecionados
+    const selectedProductsDiv = document.getElementById('selectedProducts');
+    selectedProductsDiv.innerHTML = selectedProducts.map(product => `
+        <div class="col-6">
+            <div class="card mb-3">
+                <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
+                     class="card-img-top p-2" alt="${product.name}">
+                <div class="card-body">
+                    <h6 class="card-title">${product.name}</h6>
+                    <p class="card-text text-primary">${product.price}</p>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    // Fechar modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('productSelectionModal'));
+    modal.hide();
+};
+
+// Atualizar a função de carregar produtos no modal
+async function loadModalProducts() {
+    try {
+        const productsContainer = document.getElementById('productsListContainer');
+        const categorySelect = document.getElementById('categorySelect');
+        productsContainer.innerHTML = '<div class="w-100 text-center">Carregando produtos...</div>';
+
+        const response = await fetch(`${MASTER_URL}/api/products`);
+        const data = await response.json();
+        
+        if (data.success) {
+            // Agrupar produtos por categoria
+            const productsByCategory = data.products.reduce((acc, product) => {
+                const category = product.category || 'Sem Categoria';
+                if (!acc[category]) {
+                    acc[category] = [];
+                }
+                acc[category].push(product);
+                return acc;
+            }, {});
+
+            // Atualizar select de categorias
+            const categories = Object.keys(productsByCategory);
+            categorySelect.innerHTML = `
+                <option value="all">Todas as Categorias</option>
+                ${categories.map(cat => `
+                    <option value="${cat}">${cat}</option>
+                `).join('')}
+            `;
+
+            // Função para renderizar produtos filtrados
+            function renderProducts(categoryFilter = 'all', searchTerm = '') {
+                productsContainer.innerHTML = '';
+                Object.entries(productsByCategory).forEach(([category, products]) => {
+                    if (categoryFilter === 'all' || categoryFilter === category) {
+                        // Filtrar produtos pelo termo de busca
+                        const filteredProducts = products.filter(product => 
+                            product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()))
+                        );
+
+                        if (filteredProducts.length > 0) {
+                            const categorySection = document.createElement('div');
+                            categorySection.className = 'category-section mb-4';
+                            categorySection.innerHTML = `
+                                <h5 class="category-title mb-3">${category}</h5>
+                                <div class="row g-3">
+                                    ${filteredProducts.map(product => `
+                                        <div class="col-md-3">
+                                            <div class="card h-100 product-card ${selectedProducts.find(p => p._id === product._id) ? 'selected' : ''}" 
+                                                 onclick="toggleProductSelection(${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                                                <img src="${product.imageUrl || '/default-product.png'}" 
+                                                     class="card-img-top p-2" alt="${product.name}"
+                                                     style="height: 200px; object-fit: contain;">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">${product.name}</h6>
+                                                    <p class="card-text text-primary">${product.price}</p>
+                                                </div>
+                                                <div class="card-footer bg-transparent">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input" 
+                                                               ${selectedProducts.find(p => p._id === product._id) ? 'checked' : ''}>
+                                                        <label class="form-check-label">Selecionar</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `;
+                            productsContainer.appendChild(categorySection);
+                        }
+                    }
+                });
+            }
+
+            // Renderizar todos os produtos inicialmente
+            renderProducts();
+
+            // Adicionar listeners para filtros
+            categorySelect.addEventListener('change', () => {
+                const searchTerm = document.getElementById('searchByCategory').value;
+                renderProducts(categorySelect.value, searchTerm);
+            });
+
+            document.getElementById('searchByCategory').addEventListener('input', (e) => {
+                renderProducts(categorySelect.value, e.target.value);
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+        productsContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar produtos</div>';
+    }
+}
+
+// ...existing code...
