@@ -160,7 +160,7 @@
         background: white;
         border-radius: var(--border-radius);
         padding: var(--spacing-md);
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var (--spacing-md);
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         display: flex;
         flex-direction: column;
@@ -219,7 +219,7 @@
 
         .saved-ad-buttons {
             flex-direction: column;
-            gap: var(--spacing-sm);
+            gap: var (--spacing-sm);
         }
 
         .timeline-container {
@@ -392,54 +392,16 @@
         </div>
 
         <div id="twoProductsSection">
-            <div class="form-section">
-                <div class="product-section" data-product-number="1">
-                    <div class="product-header" onclick="toggleProduct(1)">
-                        <h4>Produto 1</h4>
-                        <i class="bi bi-chevron-down toggle-icon" id="toggle-icon-1"></i>
-                    </div>
-                    <div class="product-content" id="product-content-1">
-                        <label for="product1Search" class="control-label">Pesquisar Produto 1</label>
-                        <input type="text" id="product1Search" class="form-control" oninput="filterProducts(1)">
-                        <label for="product1Select" class="form-label mt-2">Selecione o Produto 1</label>
-                        <select id="product1Select" class="form-select" onchange="selectExistingProduct(this.value, 1)">
-                          <option value="">Selecione um produto</option>
-                        </select>
-                        <label for="product1Title" class="form-label mt-2">Título do Produto 1</label>
-                        <input type="text" id="product1Title" class="form-control">
-                        <label for="product1Description" class="form-label mt-2">Descrição do Produto 1</label>
-                        <textarea id="product1Description" class="form-control" rows="2"></textarea>
-                        <label for="product1Price" class="form-label mt-2">Preço do Produto 1</label>
-                        <input type="text" id="product1Price" class="form-control">
-                        <label for="product1Image" class="form-label mt-2">Imagem do Produto 1</label>
-                        <input type="file" id="product1Image" class="form-control" data-imageUrl="">
-                    </div>
-                </div>
-
-                <div class="product-section" data-product-number="2">
-                    <div class="product-header" onclick="toggleProduct(2)">
-                        <h4>Produto 2</h4>
-                        <i class="bi bi-chevron-down toggle-icon" id="toggle-icon-2"></i>
-                    </div>
-                    <div class="product-content" id="product-content-2">
-                        <label for="product2Search" class="control-label">Pesquisar Produto 2</label>
-                        <input type="text" id="product2Search" class="form-control" oninput="filterProducts(2)">
-                        <label for="product2Select" class="form-label mt-2">Selecione o Produto 2</label>
-                        <select id="product2Select" class="form-select" onchange="selectExistingProduct(this.value, 2)">
-                          <option value="">Selecione um produto</option>
-                        </select>
-                        <label for="product2Title" class="form-label mt-2">Título do Produto 2</label>
-                        <input type="text" id="product2Title" class="form-control">
-                        <label for="product2Description" class="form-label mt-2">Descrição do Produto 2</label>
-                        <textarea id="product2Description" class="form-control" rows="2"></textarea>
-                        <label for="product2Price" class="form-label mt-2">Preço do Produto 2</label>
-                        <input type="text" id="product2Price" class="form-control">
-                        <label for="product2Image" class="form-label mt-2">Imagem do Produto 2</label>
-                        <input type="file" id="product2Image" class="form-control" data-imageUrl="">
-                    </div>
-                </div>
-            </div>
+    <div class="form-section">
+        <h4>Selecionar Produtos</h4>
+        <button type="button" class="btn btn-primary w-100" onclick="openProductSelectionModal()">
+            <i class="bi bi-grid"></i> Escolher Produtos
+        </button>
+        <div id="selectedProducts" class="row mt-3">
+            <!-- Produtos selecionados serão exibidos aqui -->
         </div>
+    </div>
+</div>
 
         <!-- Atualizar a seção de lista de produtos -->
         <div id="productListSection" class="form-section" style="display: none;">
@@ -615,6 +577,32 @@
                 <button type="button" class="btn btn-primary" onclick="handleSaveAndClose()">Salvar</button>
             </div>
         </div>
+    </div>
+  </div>
+
+  <!-- Novo modal para escolher produtos -->
+  <div class="modal fade" id="productSelectionModal" tabindex="-1" aria-labelledby="productSelectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="productSelectionModalLabel">Escolher Produtos</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Área para filtrar por categoria e listar produtos -->
+          <div class="row mb-3">
+            <div class="col">
+              <input type="text" id="searchByCategory" class="form-control" placeholder="Filtrar por Categoria...">
+            </div>
+          </div>
+          <div id="productsListContainer" class="row">
+            <!-- Conteúdo dinâmico carregado via script -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="confirmSelection" type="button" class="btn btn-primary">Confirmar Seleção</button>
+        </div>
+      </div>
     </div>
   </div>
 
