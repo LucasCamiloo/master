@@ -2120,3 +2120,139 @@ document.getElementById('confirmSelection').addEventListener('click', () => {
 
 // Atualizar campo de busca de categorias em tempo real
 document.getElementById('searchByCategory').addEventListener('input', loadModalProducts);
+
+// ...existing code...
+
+let selectedProducts = [];
+
+window.openProductSelectionModal = async function() {
+    selectedProducts = []; // Reset seleção
+    const modal = new bootstrap.Modal(document.getElementById('productSelectionModal'));
+    await loadProductsGrid();
+    updateSelectedCount();
+    modal.show();
+};
+
+async function loadProductsGrid() {
+    try {
+        const response = await fetch(`${MASTER_URL}/api/products`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = data.products.map(product => `
+                <div class="col-md-3 mb-3">
+                    <div class="card h-100 product-card ${selectedProducts.find(p => p.id === product.id) ? 'selected' : ''}" 
+                         onclick="toggleProductSelection(${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                        <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
+                             class="card-img-top p-2" alt="${product.name}">
+                        <div class="card-body">
+                            <h6 class="card-title">${product.name}</h6>
+                            <p class="card-text text-primary">${product.price}</p>
+                        </div>
+                        <div class="selected-overlay">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+    }
+}
+
+window.toggleProductSelection = function(product) {
+    const index = selectedProducts.findIndex(p => p.id === product.id);
+    
+    if (index > -1) {
+        selectedProducts.splice(index, 1);
+    } else if (selectedProducts.length < 2) {
+        selectedProducts.push(product);
+    } else {
+        alert('Você só pode selecionar 2 produtos!');
+        return;
+    }
+    
+    updateProductCards();
+    updateSelectedCount();
+};
+
+function updateProductCards() {
+    document.querySelectorAll('.product-card').forEach(card => {
+        const productId = JSON.parse(card.getAttribute('onclick').split('(')[1].split(')')[0]).id;
+        card.classList.toggle('selected', selectedProducts.some(p => p.id === productId));
+    });
+}
+
+function updateSelectedCount() {
+    document.getElementById('selectedCount').textContent = selectedProducts.length;
+}
+
+window.confirmProductSelection = function() {
+    if (selectedProducts.length !== 2) {
+        alert('Por favor, selecione exatamente 2 produtos.');
+        return;
+    }
+
+    // Atualizar preview dos produtos selecionados
+    const selectedProductsDiv = document.getElementById('selectedProducts');
+    selectedProductsDiv.innerHTML = selectedProducts.map(product => `
+        <div class="col-6">
+            <div class="card mb-3">
+                <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
+                     class="card-img-top p-2" alt="${product.name}">
+                <div class="card-body">
+                    <h6 class="card-title">${product.name}</h6>
+                    <p class="card-text text-primary">${product.price}</p>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    // Fechar modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('productSelectionModal'));
+    modal.hide();
+};
+
+// Adicionar pesquisa em tempo real
+document.getElementById('productSearchInput')?.addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    document.querySelectorAll('.product-card').forEach(card => {
+        const productName = card.querySelector('.card-title').textContent.toLowerCase();
+        const productPrice = card.querySelector('.card-text').textContent.toLowerCase();
+        const shouldShow = productName.includes(searchTerm) || productPrice.includes(searchTerm);
+        card.closest('.col-md-3').style.display = shouldShow ? '' : 'none';
+    });
+});
+
+// Atualizar a função generateAdHTML para usar os produtos selecionados
+window.generateAdHTML = function(backgroundClass) {
+    if (selectedProducts.length !== 2) {
+        alert('Por favor, selecione 2 produtos primeiro.');
+        return null;
+    }
+
+    const [product1, product2] = selectedProducts;
+    const backgroundImage = window.getBackgroundImage(backgroundClass);
+    
+    return `
+    <div class="ad-container" style="background-image: url('${backgroundImage}')">
+        <div class="products-container">
+            <div class="product">
+                <img src="${product1.imageUrl || `${MASTER_URL}/default-product.png`}" alt="${product1.name}">
+                <div class="product-title">${product1.name}</div>
+                <div class="product-description">${product1.description || ''}</div>
+                <div class="product-price">${product1.price}</div>
+            </div>
+            <div class="product">
+                <img src="${product2.imageUrl || `${MASTER_URL}/default-product.png`}" alt="${product2.name}">
+                <div class="product-title">${product2.name}</div>
+                <div class="product-description">${product2.description || ''}</div>
+                <div class="product-price">${product2.price}</div>
+            </div>
+        </div>
+    </div>`;
+};
+
+// ...existing code...
