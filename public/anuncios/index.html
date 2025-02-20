@@ -87,7 +87,7 @@
     .form-section {
         background: var(--light-bg);
         border-radius: var(--border-radius);
-        padding: var (--spacing-lg);
+        padding: var(--spacing-lg);
         margin-bottom: var(--spacing-lg);
         border: 1px solid rgba(0,0,0,0.1);
     }
@@ -160,7 +160,7 @@
         background: white;
         border-radius: var(--border-radius);
         padding: var(--spacing-md);
-        margin-bottom: var (--spacing-md);
+        margin-bottom: var(--spacing-md);
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         display: flex;
         flex-direction: column;
@@ -333,7 +333,7 @@
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">
-           <img src="/LOGO_DYP.png" alt="Logo DYP" height="30">
+            <i class="bi bi-display"></i> Projeto Telao
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
             <span class="navbar-toggler-icon"></span>
@@ -615,32 +615,6 @@
                 <button type="button" class="btn btn-primary" onclick="handleSaveAndClose()">Salvar</button>
             </div>
         </div>
-    </div>
-  </div>
-
-  <!-- Novo modal para escolher produtos -->
-  <div class="modal fade" id="productSelectionModal" tabindex="-1" aria-labelledby="productSelectionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="productSelectionModalLabel">Escolher Produtos</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-        </div>
-        <div class="modal-body">
-          <!-- Área para filtrar por categoria e listar produtos -->
-          <div class="row mb-3">
-            <div class="col">
-              <input type="text" id="searchByCategory" class="form-control" placeholder="Filtrar por Categoria...">
-            </div>
-          </div>
-          <div id="productsListContainer" class="row">
-            <!-- Conteúdo dinâmico carregado via script -->
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button id="confirmSelection" type="button" class="btn btn-primary">Confirmar Seleção</button>
-        </div>
-      </div>
     </div>
   </div>
 
