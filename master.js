@@ -239,7 +239,7 @@ setInterval(async () => {
     }
 }, 15000); // Verificar a cada 15 segundos
 
-const MASTER_URL = process.env.MASTER_URL || 'https://master-teal.vercel.app/';
+const MASTER_URL = process.env.MASTER_URL || 'https://master-teal.vercel.app';
 const SLAVE_URL = process.env.SLAVE_URL || 'https://slave-psi.vercel.app';
 
 // Update file serving routes
@@ -692,7 +692,7 @@ setInterval(async () => {
 app.post('/api/products', async (req, res) => {
     try {
         console.log('Received product data:', req.body);
-        const { name, description, price, imageUrl } = req.body;
+        const { name, description, price, imageUrl, category } = req.body;
         
         if (!name || !description || !price) {
             return res.status(400).json({ 
@@ -712,13 +712,15 @@ app.post('/api/products', async (req, res) => {
             name,
             description,
             price: formattedPrice,
-            imageUrl: imageUrl || null
+            imageUrl: imageUrl || null,
+            category: category || 'Outros' // Usa 'Outros' como fallback
         });
 
         console.log('Product saved:', {
             id: product.id,
             name: product.name,
-            price: product.price
+            price: product.price,
+            category: product.category
         });
 
         res.json({
