@@ -239,8 +239,8 @@ setInterval(async () => {
     }
 }, 15000); // Verificar a cada 15 segundos
 
-const MASTER_URL = process.env.MASTER_URL || 'https://master-teste.vercel.app';
-const SLAVE_URL = process.env.SLAVE_URL || 'https://slave-teste.vercel.app';
+const MASTER_URL = process.env.MASTER_URL || 'https://master-teal.vercel.app/';
+const SLAVE_URL = process.env.SLAVE_URL || 'https://slave-psi.vercel.app';
 
 // Update file serving routes
 app.use('/files', express.static(path.join(__dirname, 'public', 'files')));
