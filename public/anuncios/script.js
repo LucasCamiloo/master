@@ -29,6 +29,42 @@ function toggleProduct(number) {
     icon.classList.toggle('expanded');
 }
 
+// Add missing handler functions at the top
+const handleAddAd = async () => {
+    const adType = document.querySelector('.ad-type-button.active').getAttribute('data-ad-type');
+    const backgroundSelect = document.getElementById("backgroundSelect");
+    
+    if (!backgroundSelect) {
+        console.error('Background select not found');
+        return;
+    }
+
+    const backgroundClass = backgroundSelect.value;
+    
+    if ((adType === "twoProducts" && !backgroundClass.startsWith('twoProducts')) ||
+        (adType === "productList" && !backgroundClass.startsWith('list'))) {
+        alert("Por favor, selecione um fundo apropriado para o tipo de anúncio.");
+        return;
+    }
+
+    // Rest of your addAd logic
+    // ...existing code...
+};
+
+const handleCategorySearch = (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    document.querySelectorAll('.product-card').forEach(card => {
+        const productName = card.querySelector('.card-title').textContent.toLowerCase();
+        const shouldShow = productName.includes(searchTerm);
+        card.closest('.col-md-3').style.display = shouldShow ? '' : 'none';
+    });
+};
+
+const handleSaveAd = () => {
+    // Your existing save ad logic
+    // ...existing code...
+};
+
 // Update event listener initialization
 document.addEventListener("DOMContentLoaded", async () => {
     try {
