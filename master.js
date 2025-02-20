@@ -12,6 +12,7 @@ import Screen from './models/screen.js';
 import Product from './models/product.js';
 import fileService from './services/fileService.js';
 import config from './config/config.js';
+import Category from './models/category.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -1000,6 +1001,35 @@ app.put('/api/screens/:screenId/name', async (req, res) => {
             success: false,
             message: error.message
         });
+    }
+});
+
+// Endpoint para obter todas as categorias
+app.get('/api/categories', async (req, res) => {
+    try {
+        const categories = await Category.find().sort('name');
+        res.json({ success: true, categories: categories.map(cat => cat.name) });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Endpoint para adicionar nova categoria
+app.post('/api/categories', async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).json({ success: false, message: 'Nome da categoria é obrigatório' });
+        }
+        
+        const category = await Category.create({ name });
+        res.json({ success: true, category: category.name });
+    } catch (error) {
+        if (error.code === 11000) { // Erro de duplicidade
+            res.json({ success: true, category: req.body.name }); // Retorna sucesso mesmo se já existir
+        } else {
+            res.status(500).json({ success: false, message: error.message });
+        }
     }
 });
 
