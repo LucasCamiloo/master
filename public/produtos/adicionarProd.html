@@ -188,7 +188,7 @@
                 description: document.getElementById('product-description').value,
                 price: document.getElementById('product-price').value,
                 imageUrl: document.getElementById('product-image-url').value.trim(),
-                category: document.getElementById('product-category').value,
+                category: document.getElementById('product-category').value || 'Outros', // Garante que sempre terá uma categoria
                 tags: document.getElementById('product-tags').value.split(',').map(tag => tag.trim()).filter(tag => tag)
             };
 
