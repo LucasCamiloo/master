@@ -2191,26 +2191,41 @@ window.openProductSelectionModal = function() {
 
 // Carregar todos os produtos e permitir seleção de múltiplos
 async function loadAllProducts() {
-  const container = document.getElementById('productsListContainer');
-  // ...existing code de fetch de produtos...
-  container.innerHTML = data.products.map(p => `
-    <div class="col-3 mb-3">
-      <div class="card h-100">
-        <img src="${p.imageUrl}" class="card-img-top" alt="${p.name}">
-        <div class="card-body">
-          <h5 class="card-title">${p.name}</h5>
-          <p class="card-text">${p.description}</p>
-          <span class="badge bg-primary">${p.price}</span>
-        </div>
-        <div class="card-footer">
-          <input type="checkbox" class="product-checkbox" value="${p._id}"
-            data-name="${p.name}" data-description="${p.description}"
-            data-price="${p.price}" data-image="${p.imageUrl}">
-          Selecionar
-        </div>
-      </div>
-    </div>
-  `).join('');
+    try {
+        const response = await fetch(`${MASTER_URL}/api/products`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const container = document.getElementById('productsListContainer');
+            if (!container) {
+                console.error('productsListContainer element not found');
+                return;
+            }
+
+            container.innerHTML = data.products.map(p => `
+                <div class="col-3 mb-3">
+                    <div class="card h-100">
+                        <img src="${p.imageUrl}" class="card-img-top" alt="${p.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${p.name}</h5>
+                            <p class="card-text">${p.description}</p>
+                            <span class="badge bg-primary">${p.price}</span>
+                        </div>
+                        <div class="card-footer">
+                            <input type="checkbox" class="product-checkbox" value="${p._id}"
+                                data-name="${p.name}" data-description="${p.description}"
+                                data-price="${p.price}" data-image="${p.imageUrl}">
+                            Selecionar
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            console.error('Failed to load products:', data.message);
+        }
+    } catch (error) {
+        console.error('Error loading products:', error);
+    }
 }
 
 // Confirmar seleção de até dois produtos
@@ -2618,192 +2633,3 @@ async function loadModalProducts() {
 }
 
 // ...
-
-async function handleAddAd() {
-    const adTypeButton = document.querySelector('.ad-type-button.active');
-    if (!adTypeButton) {
-        alert('Selecione um tipo de anúncio primeiro');
-        return;
-    }
-
-    const adType = adTypeButton.getAttribute('data-ad-type');
-    const backgroundSelect = document.getElementById("backgroundSelect");
-    
-    if (!backgroundSelect) {
-        alert('Elemento de seleção de fundo não encontrado');
-        return;
-    }
-
-    const backgroundClass = backgroundSelect.value;
-
-    // Validate background selection
-    if ((adType === "twoProducts" && !backgroundClass.startsWith('twoProducts')) ||
-        (adType === "productList" && !backgroundClass.startsWith('list'))) {
-        alert("Por favor, selecione um fundo apropriado para o tipo de anúncio.");
-        return;
-    }
-
-    if (adType === "twoProducts" && (!selectedProducts || selectedProducts.length !== 2)) {
-        alert("Por favor, selecione exatamente 2 produtos primeiro.");
-        return;
-    }
-
-    let adHTML;
-
-    try {
-        if (adType === "twoProducts") {
-            adHTML = window.generateAdHTML(backgroundClass);
-        } else if (adType === "productList") {
-            adHTML = await generateListAdHTML(backgroundClass);
-        } else if (adType === "video") {
-            const videoUrl = document.getElementById("videoUrl")?.value?.trim();
-            if (!videoUrl) {
-                alert("Por favor, insira a URL do vídeo.");
-                return;
-            }
-            adHTML = generateVideoAdHTML(videoUrl);
-        }
-
-        if (adHTML) {
-            window.ads.push(adHTML);
-            window.currentSlide = window.ads.length - 1;
-            window.updatePreview();
-            Swal.fire({
-                icon: 'success',
-                title: 'Sucesso!',
-                text: 'Anúncio adicionado!'
-            });
-
-            // Clear selections
-            selectedProducts = [];
-            updateSelectedCount();
-        }
-    } catch (error) {
-        console.error('Erro ao adicionar anúncio:', error);
-        alert('Erro ao adicionar anúncio: ' + error.message);
-    }
-}
-
-// Add missing handleSaveAd function
-function handleSaveAd() {
-    if (!window.ads || window.ads.length === 0) {
-        alert('Adicione pelo menos um slide antes de salvar');
-        return;
-    }
-    
-    const modal = new bootstrap.Modal(document.getElementById('saveAdModal'));
-    modal.show();
-}
-
-// Fix toggleProduct function to handle missing elements
-function toggleProduct(number) {
-    const content = document.getElementById(`product-content-${number}`);
-    const icon = document.getElementById(`toggle-icon-${number}`);
-    
-    if (!content || !icon) {
-        // Element not found, silently return
-        return;
-    }
-    
-    content.classList.toggle('expanded');
-    icon.classList.toggle('expanded');
-}
-
-// Fix product selection initialization
-window.openProductSelectionModal = async function() {
-    try {
-        const modal = new bootstrap.Modal(document.getElementById('productSelectionModal'));
-        if (!modal) {
-            console.error('Product selection modal not found');
-            return;
-        }
-
-        selectedProducts = []; // Reset selection
-        await loadModalProducts();
-        updateSelectedCount();
-        modal.show();
-    } catch (error) {
-        console.error('Error opening product selection modal:', error);
-    }
-};
-
-// Fix loadModalProducts function
-async function loadModalProducts() {
-    try {
-        const productsContainer = document.getElementById('productsListContainer');
-        if (!productsContainer) {
-            console.error('Products container not found');
-            return;
-        }
-
-        productsContainer.innerHTML = '<div class="text-center">Carregando produtos...</div>';
-
-        const response = await fetch(`${MASTER_URL}/api/products`);
-        const data = await response.json();
-        
-        if (data.success && data.products) {
-            productsContainer.innerHTML = data.products.map(product => `
-                <div class="col-md-3 mb-3">
-                    <div class="card h-100 product-card" 
-                         onclick="toggleProductSelection('${product.id}')">
-                        <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
-                             class="card-img-top p-2" alt="${product.name}">
-                        <div class="card-body">
-                            <h6 class="card-title">${product.name}</h6>
-                            <p class="card-text text-primary">${product.price}</p>
-                        </div>
-                        <div class="card-footer">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input product-checkbox" 
-                                       value="${product.id}"
-                                       data-name="${product.name}"
-                                       data-price="${product.price}"
-                                       data-image="${product.imageUrl || ''}">
-                                <label class="form-check-label">Selecionar</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        } else {
-            productsContainer.innerHTML = '<div class="alert alert-warning">Nenhum produto encontrado</div>';
-        }
-    } catch (error) {
-        console.error('Error loading products:', error);
-        if (productsContainer) {
-            productsContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar produtos</div>';
-        }
-    }
-}
-
-// Update DOMContentLoaded event listener
-document.addEventListener("DOMContentLoaded", async () => {
-    try {
-        // Initialize buttons with null checks
-        const addAdButton = document.getElementById('addAd');
-        const saveAdButton = document.getElementById('saveAd');
-
-        if (addAdButton) {
-            addAdButton.addEventListener('click', handleAddAd);
-        }
-
-        if (saveAdButton) {
-            saveAdButton.addEventListener('click', handleSaveAd);
-        }
-
-        // Load initial data
-        await Promise.all([
-            loadExistingProducts(),
-            loadSavedAds()
-        ]);
-
-        // Initialize default view
-        const defaultAdType = 'twoProducts';
-        const adTypeButton = document.querySelector(`[data-ad-type="${defaultAdType}"]`);
-        if (adTypeButton) {
-            toggleAdType(defaultAdType);
-        }
-    } catch (error) {
-        console.error('Error during initialization:', error);
-    }
-});
