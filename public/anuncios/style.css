@@ -1253,3 +1253,25 @@ body {
     z-index: 1020;
 }
 
+/* Product Selection Styles */
+.card.selected {
+    border: 2px solid var(--primary-color);
+    background-color: rgba(102, 45, 145, 0.1);
+    transform: translateY(-2px);
+}
+
+.card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.selected-count {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
