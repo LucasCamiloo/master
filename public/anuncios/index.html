@@ -31,10 +31,6 @@
   <style>
     :root {
         --primary-color: #662d91;
-        --primary-light: #8347af;
-        --primary-dark: #4a1d6e;
-        --secondary-color: #8347af;
-        --success-color: #28a745;
         --danger-color: #dc3545;
         --dark-bg: #1a1a1a;
         --light-bg: #f8f9fa;
@@ -763,10 +759,615 @@
         integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" 
         crossorigin="anonymous"></script>
   <script>
-    // Remove all function definitions from here and keep only the initialization
+    // Remove the MASTER_URL declaration from here since it's already in script.js
+    
+    async function loadExistingProducts() {
+        try {
+            const response = await fetch(`${MASTER_URL}/api/products`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                const product1Select = document.getElementById('product1Select');
+                const product2Select = document.getElementById('product2Select');
+
+                if (!product1Select || !product2Select) {
+                    console.error('Elementos de seleção de produtos não encontrados');
+                    return;
+                }
+
+                const options = data.products.map(product => 
+                    `<option value="${product.id}">${product.name}</option>`
+                ).join('');
+
+                const defaultOption = '<option value="">Selecione um produto</option>';
+                product1Select.innerHTML = defaultOption + options;
+                product2Select.innerHTML = defaultOption + options;
+            }
+        } catch (error) {
+            console.error('Erro ao carregar produtos:', error);
+        }
+    }
+
+    // Update the background images in modal
+    document.getElementById('backgroundModal').querySelector('.modal-body').innerHTML = `
+        <div class="row">
+            <div class="col-md-4">
+                <img src="${MASTER_URL}/fundos/duo1.jpg" alt="Fundo 1 (Dois Produtos)" class="img-fluid">
+                <p>Fundo 1 (Dois Produtos)</p>
+            </div>
+            <div class="col-md-4">
+                <img src="${MASTER_URL}/fundos/duo2.jpg" alt="Fundo 2 (Dois Produtos)" class="img-fluid">
+                <p>Fundo 2 (Dois Produtos)</p>
+            </div>
+            <div class="col-md-4">
+                <img src="${MASTER_URL}/fundos/duo3.jpg" alt="Fundo 3 (Dois Produtos)" class="img-fluid">
+                <p>Fundo 3 (Dois Produtos)</p>
+            </div>
+            <div class="col-md-4">
+                <img src="${MASTER_URL}/fundos/list1.jpg" alt="Fundo 1 (Lista)" class="img-fluid">
+                <p>Fundo 1 (Lista)</p>
+            </div>
+            <div class="col-md-4">
+                <img src="${MASTER_URL}/fundos/list2.jpg" alt="Fundo 2 (Lista)" class="img-fluid">
+                <p>Fundo 2 (Lista)</p>
+            </div>
+            <div class="col-md-4">
+                <img src="${MASTER_URL}/fundos/list3.jpg" alt="Fundo 3 (Lista)" class="img-fluid">
+                <p>Fundo 3 (Lista)</p>
+            </div>
+        </div>
+    `;
+
+    // Update all fetch calls to use MASTER_URL
+    async function selectExistingProduct(productId, productNumber) {
+        try {
+            console.log(`Fetching product with ID: ${productId}`); // Debug log
+            const response = await fetch(`${MASTER_URL}/api/products/${productId}`);
+            if (!response.ok) {
+                throw new Error('Falha ao carregar produto');
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                const product = data.product;
+                document.getElementById(`product${productNumber}Title`).value = product.name;
+                document.getElementById(`product${productNumber}Description`).value = product.description;
+                document.getElementById(`product${productNumber}Price`).value = product.price;
+                document.getElementById(`product${productNumber}Image`).dataset.imageUrl = product.imageUrl;
+
+                // Mostrar a imagem do produto
+                const imageContainer = document.getElementById(`product${productNumber}Image`).parentNode;
+                const existingImage = imageContainer.querySelector('img');
+                if (existingImage) {
+                    existingImage.src = product.imageUrl;
+                } else {
+                    const imagePreview = document.createElement('img');
+                    imagePreview.src = product.imageUrl;
+                    imagePreview.style.maxWidth = '100%';
+                    imageContainer.appendChild(imagePreview);
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao selecionar produto:', error);
+        }
+    }
+
+    function filterProducts(productNumber) {
+        const searchInput = document.getElementById(`product${productNumber}Search`).value.toLowerCase();
+        const selectElement = document.getElementById(`product${productNumber}Select`);
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+
+        selectElement.innerHTML = products
+            .filter(product => product.name.toLowerCase().includes(searchInput))
+            .map((product, index) => `<option value="${index}">${product.name}</option>`)
+            .join('');
+    }
+
+    async function loadSavedAds() {
+        try {
+            const response = await fetch(`${MASTER_URL}/api/ads`);
+            if (!response.ok) throw new Error('Falha ao carregar anúncios');
+
+            const data = await response.json();
+            if (data.success) {
+                const container = document.getElementById('savedAdsList');
+                container.innerHTML = data.ads.map(ad => `
+                    <div class="saved-ad-card">
+                        <div class="saved-ad-thumbnail" style="background-image: url('${ad.imageUrl || `${MASTER_URL}/files/default-ad`}'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+                        <h5 class="saved-ad-title">${ad.title}</h5>
+                        <div class="saved-ad-buttons">
+                            <button class="btn btn-sm btn-primary" onclick="previewAd('${ad.id}')">
+                                <i class="bi bi-eye"></i> Visualizar
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteAd('${ad.id}')">
+                                <i class="bi bi-trash"></i> Excluir
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        } catch (error) {
+            console.error('Erro ao carregar anúncios:', error);
+            const container = document.getElementById('savedAdsList');
+            container.innerHTML = '<div class="alert alert-danger">Erro ao carregar anúncios</div>';
+        }
+    }
+
+    let currentSlide = 0;
+
+    function showSlide(n) {
+        const slides = document.querySelectorAll('#adPreview .slide');
+        if (!slides.length) return;
+
+        slides.forEach(slide => slide.style.display = 'none');
+        currentSlide = (n + slides.length) % slides.length;
+        slides[currentSlide].style.display = 'block';
+
+        // Update active state in timeline
+        const timelineSlides = document.querySelectorAll('.timeline-slide');
+        timelineSlides.forEach((slide, index) => {
+            slide.classList.toggle('active', index === currentSlide);
+        });
+    }
+
+    function nextSlide() {
+        showSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+        showSlide(currentSlide - 1);
+    }
+
+    function toggleProduct(number) {
+        const content = document.getElementById(`product-content-${number}`);
+        const icon = document.getElementById(`toggle-icon-${number}`);
+        content.classList.toggle('expanded');
+        icon.classList.toggle('expanded');
+    }
+
+    // Add these global function declarations
+    window.previewAd = async function(adId) {
+        try {
+            const response = await fetch(`${MASTER_URL}/api/ads/${adId}`);
+            if (!response.ok) throw new Error('Falha ao carregar anúncio');
+
+            const data = await response.json();
+            if (data.success) {
+                const modal = new bootstrap.Modal(document.getElementById('previewAdModal'));
+                const previewContent = document.getElementById('previewAdContent');
+                previewContent.innerHTML = '';
+
+                // Handle both single content and array of content
+                const contents = Array.isArray(data.ad.content) ? data.ad.content : [data.ad.content];
+
+                contents.forEach((slide, index) => {
+                    const slideDiv = document.createElement('div');
+                    slideDiv.className = `slide ${index === 0 ? 'active' : ''}`;
+                    slideDiv.style.display = index === 0 ? 'block' : 'none';
+                    slideDiv.innerHTML = slide;
+                    previewContent.appendChild(slideDiv);
+                });
+
+                if (contents.length > 1) {
+                    const nav = document.createElement('div');
+                    nav.className = 'slide-nav';
+                    nav.innerHTML = `
+                        <button onclick="prevModalSlide()" class="btn-lg">
+                            <i class="bi bi-chevron-left"></i> Anterior
+                        </button>
+                        <button onclick="nextModalSlide()" class="btn-lg">
+                            Próximo <i class="bi bi-chevron-right"></i>
+                        </button>
+                    `;
+                    previewContent.appendChild(nav);
+                }
+
+                modal.show();
+                currentModalSlide = 0; // Reset current slide
+
+                // Force layout recalculation
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, 100);
+            }
+        } catch (error) {
+            console.error('Erro ao pré-visualizar anúncio:', error);
+            alert('Erro ao pré-visualizar anúncio: ' + error.message);
+        }
+    };
+
+    // Add separate navigation functions for modal
+    let currentModalSlide = 0;
+
+    window.nextModalSlide = function() {
+        const slides = document.querySelectorAll('#previewAdContent .slide');
+        if (!slides.length) return;
+
+        slides[currentModalSlide].classList.remove('active');
+        setTimeout(() => {
+            slides[currentModalSlide].style.display = 'none';
+            currentModalSlide = (currentModalSlide + 1) % slides.length;
+            slides[currentModalSlide].style.display = 'block';
+            setTimeout(() => {
+                slides[currentModalSlide].classList.add('active');
+            }, 50);
+        }, 500);
+    };
+
+    window.prevModalSlide = function() {
+        const slides = document.querySelectorAll('#previewAdContent .slide');
+        if (!slides.length) return;
+
+        slides[currentModalSlide].classList.remove('active');
+        setTimeout(() => {
+            slides[currentModalSlide].style.display = 'none';
+            currentModalSlide = (currentModalSlide - 1 + slides.length) % slides.length;
+            slides[currentModalSlide].style.display = 'block';
+            setTimeout(() => {
+                slides[currentModalSlide].classList.add('active');
+            }, 50);
+        }, 500);
+    };
+
+    window.useAd = async function(adId) {
+        try {
+            const response = await fetch(`${MASTER_URL}/api/ads/${adId}`);
+            if (!response.ok) throw new Error('Falha ao carregar anúncio');
+
+            const data = await response.json();
+            if (data.success && data.ad) {
+                window.ads = Array.isArray(data.ad.content) ? data.ad.content : [data.ad.content];
+                document.getElementById('adTitle').value = data.ad.title;
+                window.updatePreview();
+                window.updateSlidesList();
+            }
+        } catch (error) {
+            console.error('Erro ao carregar anúncio:', error);
+            alert('Erro ao carregar anúncio: ' + error.message);
+        }
+    };
+
+    window.deleteAd = async function(adId) {
+        if (!confirm('Tem certeza que deseja excluir este anúncio?')) return;
+
+        try {
+            const response = await fetch(`${MASTER_URL}/api/ads/${adId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) throw new Error('Falha ao excluir anúncio');
+
+            const data = await response.json();
+            if (data.success) {
+                alert('Anúncio excluído com sucesso!');
+                loadSavedAds(); // Reload the ads list
+            }
+        } catch (error) {
+            console.error('Erro ao excluir anúncio:', error);
+            alert('Erro ao excluir anúncio: ' + error.message);
+        }
+    };
+
+    function toggleAdType(adType) {
+        const twoProductsSection = document.getElementById("twoProductsSection");
+        const productListSection = document.getElementById("productListSection");
+        const videoSection = document.getElementById("videoSection");
+        const backgroundSelect = document.getElementById("backgroundSelect");
+        
+        // Update active button state
+        document.querySelectorAll('.ad-type-button').forEach(button => {
+            if (button.getAttribute('data-ad-type') === adType) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+        });
+
+        // Show/hide sections based on type
+        if (adType === "twoProducts") {
+            twoProductsSection.classList.remove("hidden");
+            productListSection.style.display = "none";
+            videoSection.style.display = "none";
+            backgroundSelect.closest('.form-section').style.display = "block";
+            Array.from(backgroundSelect.options).forEach(option => {
+                option.style.display = option.value.startsWith('twoProducts') ? '' : 'none';
+            });
+            if (backgroundSelect.value.startsWith('list')) {
+                backgroundSelect.value = 'twoProducts1';
+            }
+        } else if (adType === "productList") {
+            twoProductsSection.classList.add("hidden");
+            productListSection.style.display = "block";
+            videoSection.style.display = "none";
+            backgroundSelect.closest('.form-section').style.display = "block";
+            loadProductsForSelection();
+            Array.from(backgroundSelect.options).forEach(option => {
+                option.style.display = option.value.startsWith('list') ? '' : 'none';
+            });
+            if (backgroundSelect.value.startsWith('twoProducts')) {
+                backgroundSelect.value = 'list1';
+            }
+        } else if (adType === "video") {
+            twoProductsSection.classList.add("hidden");
+            productListSection.style.display = "none";
+            videoSection.style.display = "block";
+            backgroundSelect.closest('.form-section').style.display = "none";
+        }
+    }
+
+    async function handleSaveAndClose() {
+        const title = document.getElementById('adTitleModal').value;
+        if (!title) {
+            alert('Por favor, digite um título para o anúncio');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${MASTER_URL}/api/ads`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: title,
+                    content: window.ads
+                })
+            });
+
+            if (!response.ok) throw new Error('Falha ao salvar anúncio');
+
+            const data = await response.json();
+            if (data.success) {
+                alert('Anúncio salvo com sucesso!');
+                loadSavedAds();
+                closeAndClearModal();
+            }
+        } catch (error) {
+            console.error('Erro ao salvar anúncio:', error);
+            alert('Erro ao salvar anúncio: ' + error.message);
+        }
+    }
+
+    function closeAndClearModal() {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('saveAdModal'));
+        if (modal) {
+            modal.hide();
+            setTimeout(() => {
+                document.getElementById('adTitleModal').value = '';
+                document.body.classList.remove('modal-open');
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }, 200);
+        }
+    }
+
+    // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
+        loadExistingProducts();
+        toggleProduct(1);
+        toggleAdType('twoProducts'); // Start with two products view
+        loadSavedAds(); // Load saved ads
+    });
+
+    // Replace updateSlidesList function with updateTimeline
+    window.updateSlidesList = function() {
+        const timelineContainer = document.getElementById('timelineSlides');
+        if (!timelineContainer) return;
+        
+        timelineContainer.innerHTML = window.ads.map((adHTML, index) => {
+            const thumbnailDiv = document.createElement('div');
+            thumbnailDiv.className = `timeline-slide ${index === currentSlide ? 'active' : ''}`;
+            thumbnailDiv.onclick = () => showSlide(index);
+            
+            // Create a temporary container to extract the background image
+            const temp = document.createElement('div');
+            temp.innerHTML = adHTML;
+            const adContainer = temp.querySelector('.ad-container');
+            const bgImage = adContainer ? 
+                adContainer.style.backgroundImage : 
+                'linear-gradient(45deg, #2a2a2a 25%, #3a3a3a 25%, #3a3a3a 50%, #2a2a2a 50%, #2a2a2a 75%, #3a3a3a 75%, #3a3a3a 100%)';
+            
+            thumbnailDiv.innerHTML = `
+                <div class="thumbnail" style="background: ${bgImage}; background-size: cover;"></div>
+                <button class="remove-btn" onclick="removeSlide(${index}); event.stopPropagation();">
+                    <i class="bi bi-x"></i>
+                </button>
+                <div class="slide-number">Slide ${index + 1}</div>
+            `;
+            
+            return thumbnailDiv.outerHTML;
+        }).join('');
+    };
+
+    // Add new timeline functions
+    function toggleTimeline() {
+        const timeline = document.querySelector('.timeline-container');
+        timeline.classList.toggle('collapsed');
+        
+        // Update main content height
+        document.documentElement.style.setProperty(
+            '--timeline-height', 
+            timeline.classList.contains('collapsed') ? '40px' : '160px'
+        );
+    }
+
+    function scrollTimeline(direction) {
+        const container = document.querySelector('.timeline-content');
+        const scrollAmount = 200;
+        if (direction === 'left') {
+            container.scrollLeft -= scrollAmount;
+        } else {
+            container.scrollLeft += scrollAmount;
+        }
+    }
+
+    // Update the updateSlidesList function to also update timeline
+    window.updateSlidesList = function() {
+        const timelineContainer = document.querySelector('.timeline-content');
+        if (!timelineContainer) return;
+        
+        // Remove existing scroll buttons
+        const existingButtons = timelineContainer.querySelectorAll('.timeline-scroll-btn');
+        existingButtons.forEach(btn => btn.remove());
+        
+        const slidesHTML = window.ads.map((adHTML, index) => {
+            const thumbnailDiv = document.createElement('div');
+            thumbnailDiv.className = `timeline-slide ${index === currentSlide ? 'active' : ''}`;
+            thumbnailDiv.onclick = () => showSlide(index);
+            
+            // Create a temporary container to extract the background image
+            const temp = document.createElement('div');
+            temp.innerHTML = adHTML;
+            const adContainer = temp.querySelector('.ad-container');
+            const bgImage = adContainer ? 
+                adContainer.style.backgroundImage : 
+                'linear-gradient(45deg, #2a2a2a 25%, #3a3a3a 25%, #3a3a3a 50%, #2a2a2a 50%, #2a2a2a 75%, #3a3a3a 75%, #3a3a3a 100%)';
+            
+            thumbnailDiv.innerHTML = `
+                <div class="thumbnail" style="background: ${bgImage}; background-size: cover;"></div>
+                <button class="remove-btn" onclick="removeSlide(${index}); event.stopPropagation();">
+                    <i class="bi bi-x"></i>
+                </button>
+                <div class="slide-number">Slide ${index + 1}</div>
+            `;
+            
+            return thumbnailDiv.outerHTML;
+        }).join('');
+
+        // Add back the scroll buttons and slides content
+        timelineContainer.innerHTML = `
+            <button class="timeline-scroll-btn left" onclick="scrollTimeline('left')">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            ${slidesHTML}
+            <button class="timeline-scroll-btn right" onclick="scrollTimeline('right')">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        `;
+
+        // Show timeline if there are slides
+        if (window.ads.length > 0) {
+            document.querySelector('.timeline-container').classList.remove('collapsed');
+        }
+    };
+
+    // Update existing addAd event listener to show timeline after adding
+    document.getElementById('addAd').addEventListener('click', async function() {
+        const adType = document.querySelector('.ad-type-button.active').getAttribute('data-ad-type');
+        const backgroundClass = document.getElementById("backgroundSelect").value;
+        
+        // Validate background selection
+        if ((adType === "twoProducts" && !backgroundClass.startsWith('twoProducts')) ||
+            (adType === "productList" && !backgroundClass.startsWith('list'))) {
+            alert("Por favor, selecione um fundo apropriado para o tipo de anúncio.");
+            return;
+        }
+
+        let adHTML;
+
+        if (adType === "twoProducts") {
+            const product1 = {
+                title: document.getElementById("product1Title").value,
+                description: document.getElementById("product1Description").value,
+                price: document.getElementById("product1Price").value,
+                imageUrl: document.getElementById("product1Image").dataset.imageUrl
+            };
+            const product2 = {
+                title: document.getElementById("product2Title").value,
+                description: document.getElementById("product2Description").value,
+                price: document.getElementById("product2Price").value,
+                imageUrl: document.getElementById("product2Image").dataset.imageUrl
+            };
+
+            adHTML = generateAdHTML(product1, product2, product1.imageUrl, product2.imageUrl, backgroundClass);
+        } else if (adType === "productList") {
+            const selectedProducts = document.querySelectorAll('#productCheckboxes input:checked');
+            if (selectedProducts.length > 10) {
+                alert("Você só pode adicionar até 10 itens em uma lista.");
+                return;
+            }
+            adHTML = await generateListAdHTML(backgroundClass);
+        } else if (adType === "video") {
+            const videoFile = document.getElementById("videoInput").files[0];
+            if (!videoFile) {
+                alert("Por favor, selecione um vídeo.");
+                return;
+            }
+
+            const videoUrl = await uploadVideo(videoFile);
+            if (!videoUrl) {
+                alert("Erro ao fazer upload do vídeo.");
+                return;
+            }
+
+            adHTML = generateVideoAdHTML(videoUrl);
+        }
+
+        if (adHTML) {
+            window.ads.push(adHTML);
+            updatePreview();
+            updateSlidesList();
+            alert("Anúncio adicionado!");
+        }
+    });
+
+    // Adicionar função para filtrar produtos na lista
+    function filterProductsList(searchTerm) {
+        const checkboxes = document.querySelectorAll('#productCheckboxes .form-check');
+        searchTerm = searchTerm.toLowerCase();
+        
+        checkboxes.forEach(checkbox => {
+            const label = checkbox.querySelector('label').textContent.toLowerCase();
+            checkbox.style.display = label.includes(searchTerm) ? '' : 'none';
+        });
+    }
+
+    // Update default product image URL
+    function generateAdHTML(product1, product2, image1, image2, backgroundClass) {
+        const backgroundImage = getBackgroundImage(backgroundClass);
+        return `
+        <div class="ad-container" style="background-image: url('${backgroundImage}')">
+            <div class="products-container">
+                <div class="product">
+                    <img src="${image1 ? `${MASTER_URL}${image1}` : `${MASTER_URL}/default-product.png`}" alt="Produto 1">
+                    <!-- ...existing code... -->
+                </div>
+                <div class="product">
+                    <img src="${image2 ? `${MASTER_URL}${image2}` : `${MASTER_URL}/default-product.png`}" alt="Produto 2">
+                    <!-- ...existing code... -->
+                </div>
+            </div>
+        </div>
+        `;
+    }
+
+    // Update getBackgroundImage function
+    window.getBackgroundImage = function(backgroundClass) {
+        const basePath = `${MASTER_URL}/fundos/`;
+        let imagePath;
+        
+        switch (backgroundClass) {
+            case 'twoProducts1': imagePath = 'duo1.jpg'; break;
+            case 'twoProducts2': imagePath = 'duo2.jpg'; break;
+            case 'twoProducts3': imagePath = 'duo3.jpg'; break;
+            case 'list1': imagePath = 'list1.jpg'; break;
+            case 'list2': imagePath = 'list2.jpg'; break;
+            case 'list3': imagePath = 'list3.jpg'; break;
+            default:
+                return `${MASTER_URL}/default-product.png`;
+        }
+        return `${basePath}${imagePath}`;
+    };
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // The initialization is now handled in script.js
         console.log('DOM loaded');
-        // The initialization will be handled by script.js
     });
 </script>
 </body>
