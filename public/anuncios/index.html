@@ -778,8 +778,31 @@
     function toggleProduct(number) {
         const content = document.getElementById(`product-content-${number}`);
         const icon = document.getElementById(`toggle-icon-${number}`);
-        content.classList.toggle('expanded');
-        icon.classList.toggle('expanded');
+        
+        if (!content || !icon) {
+            console.warn('Required elements for toggleProduct not found');
+            return;
+        }
+
+        const allContents = document.querySelectorAll('.product-content');
+        const allIcons = document.querySelectorAll('.toggle-icon');
+        
+        // Close all products first
+        allContents.forEach(el => el.style.display = 'none');
+        allIcons.forEach(el => el.classList.remove('expanded'));
+        
+        // Open the clicked product if it was not already expanded
+        if (content.style.display !== 'block') {
+            content.style.display = 'block';
+            icon.classList.add('expanded');
+        }
+    }
+
+    // Initialize product state
+    function initializeProductState() {
+        document.querySelectorAll('.product-content').forEach(content => {
+            content.style.display = 'none';
+        });
     }
 
     // Add these global function declarations
@@ -1001,7 +1024,7 @@
 
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
-        loadExistingProducts();
+        initializeProductState();
         toggleProduct(1);
         toggleAdType('twoProducts'); // Start with two products view
         loadSavedAds(); // Load saved ads
