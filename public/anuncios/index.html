@@ -611,18 +611,23 @@
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="productSelectionModalLabel">Escolher Produtos (selecione 2)</h5>
+                <h5 class="modal-title" id="productSelectionModalLabel">Escolher Produtos</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
                 <div class="row mb-3">
-                    <div class="col">
+                    <div class="col-md-4">
+                        <select id="categorySelect" class="form-select">
+                            <option value="all">Todas as Categorias</option>
+                        </select>
+                    </div>
+                    <div class="col-md-8">
                         <div class="input-group">
                             <span class="input-group-text">
                                 <i class="bi bi-search"></i>
                             </span>
                             <input type="text" id="searchByCategory" class="form-control" 
-                                   placeholder="Pesquisar por categoria ou nome do produto...">
+                                   placeholder="Pesquisar produtos...">
                         </div>
                     </div>
                 </div>
@@ -632,7 +637,7 @@
             </div>
             <div class="modal-footer">
                 <div class="selected-count me-auto">
-                    Produtos selecionados: <span id="selectedCount">0</span>/2
+                    Produtos selecionados: <span id="selectedCount">0</span>
                 </div>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-primary" onclick="confirmProductSelection()">
