@@ -73,18 +73,17 @@ async function initializeApp() {
     }
 }
 
-// Update loadExistingProducts function
+// Single definition of loadExistingProducts
 async function loadExistingProducts() {
     try {
         const response = await fetch(`${MASTER_URL}/api/products`);
         const data = await response.json();
 
         if (data.success && data.products) {
-            window.allProducts = data.products; // Store products globally
+            window.allProducts = data.products;
 
-            // Update product selection UI if it exists
-            const product1Select = getElement('product1Select');
-            const product2Select = getElement('product2Select');
+            const product1Select = document.getElementById('product1Select');
+            const product2Select = document.getElementById('product2Select');
 
             if (product1Select && product2Select) {
                 const options = data.products.map(product => 
@@ -146,8 +145,24 @@ async function handleProductSelection() {
 }
 
 // Update DOMContentLoaded event listener
-document.addEventListener('DOMContentLoaded', () => {
-    initializeApp();
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        await loadExistingProducts();
+        
+        // Initialize product toggles
+        const product1Content = document.getElementById('product-content-1');
+        const icon1 = document.getElementById('toggle-icon-1');
+        
+        if (product1Content && icon1) {
+            product1Content.style.display = 'block';
+            icon1.classList.add('expanded');
+        }
+
+        toggleAdType('twoProducts');
+        await loadSavedAds();
+    } catch (error) {
+        console.error('Error during initialization:', error);
+    }
 });
 
 // Initialize updatePreview function in global scope
@@ -1423,7 +1438,7 @@ function toggleAdType(adType) {
             productListSection.style.display = "block";
             backgroundSelect.closest('.form-section').style.display = "block";
             updateBackgroundOptions("productList");
-            loadProductsForSelection();
+            loadProductsForSelection(); // Carregar produtos quando alternar para esta view
             break;
         case "video":
             videoSection.style.display = "block";
@@ -1527,7 +1542,7 @@ window.toggleAdType = function(adType) {
             productListSection.style.display = "block";
             backgroundSelect.closest('.form-section').style.display = "block";
             updateBackgroundOptions("productList");
-            loadProductsForSelection(); // Carregar produtos quando alternar para esta view
+            loadProductsForSelection(); // Use window.loadProductsForSelection
             break;
         case "video":
             videoSection.style.display = "block";
@@ -2016,7 +2031,7 @@ window.removeSlide = function(index) {
         // Remover o slide
         window.ads.splice(index, 1);
 
-        // Ajustar o índice atual
+        // Ajustar o índice atual se necessário
         if (window.currentSlide >= window.ads.length) {
             window.currentSlide = Math.max(0, window.ads.length - 1);
         }
