@@ -85,45 +85,32 @@ async function loadProductsModal() {
             return;
         }
 
-        // Show loading state
-        grid.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Carregando produtos...</div></div>';
+        grid.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
 
-        const response = await fetch(`${MASTER_URL}/api/products`);
-        console.log('API Response:', response); // Debug log
-
-        if (!response.ok) throw new Error('Failed to fetch products');
+        console.log('Fetching products from:', window.MASTER_URL); // Debug log
+        const response = await fetch(`${window.MASTER_URL}/api/products`);
         
+        if (!response.ok) {
+            throw new Error(`Failed to fetch products: ${response.status}`);
+        }
+
         const data = await response.json();
         console.log('Products data:', data); // Debug log
 
-        if (!data.success || !data.products) throw new Error('Invalid product data');
+        if (!data.success || !Array.isArray(data.products)) {
+            throw new Error('Invalid product data received');
+        }
 
         window.allProducts = data.products;
 
-        // Render products grid
-        grid.innerHTML = `
-            <div class="products-grid">
-                ${data.products.map(product => `
-                    <div class="product-card ${window.selectedProducts.some(p => p.id === product.id) ? 'selected' : ''}"
-                         onclick="toggleProductSelection('${product.id}')">
-                        <img src="${product.imageUrl || '/default-product.png'}" 
-                             alt="${product.name}"
-                             onerror="this.src='${MASTER_URL}/default-product.png'">
-                        <div class="product-info">
-                            <div class="product-name">${product.name}</div>
-                            <div class="product-price">${product.price}</div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-
-        // Update preview of selected products
+        renderProductsGrid(data.products);
         updateSelectedProductsPreview();
 
     } catch (error) {
         console.error('Error loading products:', error);
-        grid.innerHTML = '<div class="alert alert-danger m-3">Error loading products</div>';
+        if (grid) {
+            grid.innerHTML = `<div class="alert alert-danger">Error loading products: ${error.message}</div>`;
+        }
     }
 }
 
@@ -2201,7 +2188,6 @@ async function loadProductsModal() {
             return;
         }
 
-        // Show loading state
         grid.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Carregando produtos...</div></div>';
 
         const response = await fetch(`${MASTER_URL}/api/products`);
@@ -2224,7 +2210,7 @@ async function loadProductsModal() {
                          onclick="toggleProductSelection('${product.id}')">
                         <img src="${product.imageUrl || '/default-product.png'}" 
                              alt="${product.name}"
-                             onerror="this.src='${MASTER_URL}/default-product.png'">
+                             onerror="this.src='${MASTER_URL}/default-product.png'}">
                         <div class="product-info">
                             <div class="product-name">${product.name}</div>
                             <div class="product-price">${product.price}</div>
