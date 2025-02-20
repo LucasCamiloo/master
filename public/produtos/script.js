@@ -257,60 +257,100 @@ document.getElementById('import-form')?.addEventListener('submit', async functio
 });
 
 // Função para importar produtos
-function importProducts() {
+async function importProducts() {
     const fileInput = document.getElementById('import-file');
-    console.log('Iniciando importação...');
+    if (!fileInput.files || !fileInput.files[0]) {
+        alert('Por favor, selecione um arquivo.');
+        return;
+    }
 
-    if (fileInput.files && fileInput.files[0]) {
-        const reader = new FileReader();
-        
-        reader.onload = async function(e) {
+    // Mostrar indicador de carregamento
+    document.getElementById('loading').style.display = 'block';
+
+    try {
+        const fileContent = await fileInput.files[0].text();
+        console.log('Conteúdo do arquivo:', fileContent);
+
+        const productData = JSON.parse(fileContent);
+        if (!Array.isArray(productData)) {
+            throw new Error('O arquivo deve conter um array de produtos');
+        }
+
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (const item of productData) {
+            if (!item.produto) {
+                console.error('Produto inválido:', item);
+                errorCount++;
+                continue;
+            }
+
             try {
-                const fileContent = e.target.result;
-                console.log('Conteúdo do arquivo:', fileContent);
-
-                const productData = JSON.parse(fileContent);
-                console.log('Dados parseados:', productData);
-
-                // Mostrar indicador de carregamento
-                document.getElementById('loading').style.display = 'block';
-                
-                for (const item of productData) {
-                    if (!item.produto) continue;
-                    
-                    const product = {
-                        name: item.produto.nome,
-                        description: item.produto.descricao,
-                        price: typeof item.produto.preco === 'number' ? 
-                               item.produto.preco.toFixed(2) : 
-                               item.produto.preco.toString(),
-                        image: item.produto.foto
-                    };
-                    
-                    console.log('Produto formatado:', product);
-
+                // Primeiro tenta criar a categoria se existir
+                if (item.produto.categoria) {
                     try {
-                        await saveToAPI(product);
-                        console.log('Produto salvo:', product.name);
-                    } catch (error) {
-                        console.error('Erro ao salvar produto:', error);
+                        await fetch(`${MASTER_URL}/api/categories`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ name: item.produto.categoria })
+                        });
+                    } catch (categoryError) {
+                        console.warn('Aviso ao criar categoria:', categoryError);
+                        // Continua mesmo se houver erro na categoria
                     }
                 }
 
-                // Esconder indicador de carregamento
-                document.getElementById('loading').style.display = 'none';
-                alert('Produtos importados com sucesso!');
-                window.location.href = 'product-list.html';
-            } catch (error) {
-                document.getElementById('loading').style.display = 'none';
-                console.error('Erro ao processar arquivo:', error);
-                alert('Erro ao processar arquivo: ' + error.message);
-            }
-        };
+                // Prepara os dados do produto
+                const product = {
+                    name: item.produto.nome,
+                    description: item.produto.descricao,
+                    price: typeof item.produto.preco === 'number' ? 
+                           `R$ ${item.produto.preco.toFixed(2)}` : 
+                           item.produto.preco,
+                    imageUrl: item.produto.foto || null,
+                    category: item.produto.categoria || 'Outros',
+                    tags: item.produto.tags || []
+                };
 
-        reader.readAsText(fileInput.files[0]);
-    } else {
-        alert('Por favor, selecione um arquivo');
+                // Envia o produto para a API
+                const response = await fetch(`${MASTER_URL}/api/products`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(product)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    successCount++;
+                    console.log('Produto salvo com sucesso:', product.name);
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Erro ao salvar produto:', item.produto.nome, error);
+                errorCount++;
+            }
+        }
+
+        // Mostrar resultado final
+        alert(`Importação concluída!\nProdutos salvos: ${successCount}\nErros: ${errorCount}`);
+        if (successCount > 0) {
+            window.location.href = 'product-list.html';
+        }
+    } catch (error) {
+        console.error('Erro ao processar arquivo:', error);
+        alert('Erro ao processar arquivo: ' + error.message);
+    } finally {
+        document.getElementById('loading').style.display = 'none';
     }
 }
 
