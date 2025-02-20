@@ -1,0 +1,21 @@
+{
+  "screens": [
+    {
+      "slaveUrl": "http://localhost:3000",
+      "content": [
+        "\n        <div class=\"video-container\">\n            <video \n                src=\"http://localhost:4000/uploads/1737373975200-250580384.mp4\" \n                autoplay \n                muted \n                playsinline \n                \n                style=\"width: 100%; height: 100%; object-fit: contain;\">\n                Your browser does not support the video tag.\n            </video>\n        </div>\n        "
+      ],
+      "registered": true,
+      "dateRegistered": "2025-01-20T11:52:32.616Z",
+      "name": "aces",
+      "currentAd": "1737373977813"
+    },
+    {
+      "slaveUrl": "http://localhost:3000",
+      "content": [],
+      "registered": true,
+      "dateRegistered": "2025-01-20T12:00:32.395Z",
+      "name": "Sem nomecas"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "./master.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/master.js"
+    },
+    {
+      "src": "/events",
+      "dest": "/master.js"
+    },
+    {
+      "src": "/register",
+      "dest": "/master.js"
+    },
+    {
+      "src": "/screens",
+      "dest": "/master.js"
+    },
+    {
+      "src": "/content",
+      "dest": "/master.js"
+    },
+    {
+      "src": "/(.+)",
+      "dest": "/master.js"
+    },
+    {
+      "src": "/",
+      "dest": "/master.js"
+    }
+  ]
+}

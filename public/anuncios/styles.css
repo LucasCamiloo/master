@@ -1,0 +1,234 @@
+/* ...existing code... */
+
+.bi-info-circle {
+    margin-left: 10px;
+    color: #007bff;
+    font-size: 1.2em;
+}
+
+.modal-body img {
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
+    width: 100%;
+}
+
+.modal-body p {
+    text-align: center;
+    font-weight: bold;
+}
+body {
+    background-color: #f4f4f4;
+  }
+  
+  .ad-preview,
+  #slidesContainer {
+    background: linear-gradient(to bottom, #ffffff, #e7f0fa);
+    color: #333;
+    text-align: center;
+    font-family: Arial, sans-serif;
+  }
+  
+  .ad-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px 50px;
+    margin-bottom: 40px;
+  }
+  
+  .ad-header img {
+    max-height: 90px;
+  }
+  
+  .products-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
+    flex-direction: row;
+    width: 100%;
+    padding: 20px 60px;
+    margin: 40px 0;
+    gap: 80px;
+  }
+  
+  .product {
+    flex: 0 1 40%;
+    margin: 20px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .product img {
+    max-width: 280px;
+    max-height: 280px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    object-fit: contain;
+  }
+  
+  .product-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 15px;
+    margin-bottom: 10px;
+  }
+  
+  .product-price {
+    font-size: 32px;
+    color: #d9534f;
+    font-weight: bold;
+    margin-top: 15px;
+  }
+  
+  .product-description {
+    font-size: 16px;
+    color: #555;
+    margin: 15px 0;
+    line-height: 1.6;
+  }
+  
+  .ad-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  #slidesPreview {
+    margin-top: 30px;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  #slidesList {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  #slidesList li {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  #slidesList li img {
+    max-width: 80px;
+    margin-right: 15px;
+  }
+  
+  #slidesList li .slide-info {
+    flex: 1;
+  }
+  
+  #slidesList li .remove-slide {
+    background-color: #ff6b6b;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  #slidesList li .remove-slide:hover {
+    background-color: #e63939;
+  }
+  
+  /* Add these styles for both preview and display */
+  .ad-container {
+      width: 1920px;
+      height: 1080px;
+      position: relative;
+      background-size: cover !important;
+      background-position: center !important;
+      background-repeat: no-repeat !important;
+  }
+  
+  /* Two Products Layout */
+  .products-container {
+      position: absolute;
+      width: 1200px;
+      height: 400px;
+      left: 50%;
+      top: 52%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(255, 255, 255, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 100px;
+      border-radius: 15px;
+      padding: 20px;
+  }
+  
+  .product {
+      width: 400px;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+  }
+  
+  .product img {
+      width: 250px;
+      height: 200px;
+      object-fit: contain;
+      margin-bottom: 20px;
+      background: transparent;
+  }
+  
+  /* List Layout */
+  .products-list-container {
+      position: absolute;
+      width: 80%;
+      max-width: 1400px;
+      height: auto;
+      max-height: 800px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      overflow-y: auto;
+      padding: 30px;
+  }
+  
+  .product-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      margin: 10px 0;
+      padding: 15px 30px;
+      border-radius: 8px;
+  }
+  
+  .product-list-name {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+  }
+  
+  .product-list-price {
+      font-size: 24px;
+      font-weight: bold;
+      color: #d9534f;
+  }
+  
+  .product-list-item.highlight {
+      background-color: #d9534f;
+      color: white;
+  }

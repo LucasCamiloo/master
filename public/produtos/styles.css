@@ -1,0 +1,285 @@
+:root {
+    --primary-color: #662d91;
+    --primary-light: #8347af;
+    --primary-dark: #4a1d6e;
+    --primary-transparent: rgba(102, 45, 145, 0.1);
+    --secondary-color: #8347af;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --dark-bg: #1a1a1a;
+    --light-bg: #f8f9fa;
+    --border-radius: 8px;
+}
+
+/* Estilos Globais */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+    line-height: 1.6;
+}
+
+header {
+    background-color: var(--primary-color);
+    color: #fff;
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+}
+
+main {
+    padding: 20px;
+    max-width: 1800px; /* Reduzir o max-width para se ajustar melhor em telas pequenas */
+    margin: 0 auto;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+h2 {
+    color: #555;
+    margin-bottom: 20px;
+}
+
+/* Formulário de Adição de Produtos */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="file"],
+textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+textarea {
+    resize: vertical;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+button:hover {
+    background-color: var(--primary-light);
+    transform: scale(1.05);
+}
+
+/* Lista de Produtos */
+#product-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Largura mínima de 300px por card */
+    gap: 20px; /* Espaçamento uniforme entre os cards */
+    padding: 20px;
+}
+
+.product-item {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: auto; /* Altura automática */
+    min-height: 450px; /* Altura mínima para manter consistência */
+    transition: transform 0.3s ease;
+}
+
+.product-item img {
+    width: 100%;
+    height: 200px; /* Altura fixa para as imagens */
+    object-fit: contain; /* Mantém a proporção da imagem */
+    margin-bottom: 15px;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.product-item h3 {
+    font-size: 1.2rem;
+    margin: 10px 0;
+    line-height: 1.4;
+}
+
+.product-item p {
+    font-size: 1rem;
+    color: #666;
+    flex-grow: 1; /* Ocupa espaço disponível */
+}
+
+.product-item .fw-bold {
+    font-size: 1.4rem;
+    color: #0d6efd;
+    margin: 15px 0;
+}
+
+.product-item .btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: auto; /* Empurra os botões para baixo */
+}
+
+.product-item .btn-group button {
+    flex: 1; /* Botões com largura igual */
+}
+
+/* Ajustes responsivos */
+@media (max-width: 1200px) {
+    #product-container {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+}
+
+@media (max-width: 992px) {
+    #product-container {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    #product-container {
+        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    }
+}
+
+@media (max-width: 576px) {
+    #product-container {
+        grid-template-columns: 1fr; /* Uma coluna em telas muito pequenas */
+    }
+}
+
+@media (max-width: 600px) {
+    #product-container {
+        grid-template-columns: 1fr; /* Colunas únicas em telas pequenas */
+    }
+}
+
+#product-container p {
+    text-align: center;
+    color: #999;
+}
+
+.product-card {
+    background-color: #f4f4f4;
+    border: 1px solid var(--primary-transparent);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.product-card h3 {
+    margin: 10px 0 5px;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.product-card p {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.product-card:hover {
+    transform: scale(1.05); /* Aumenta ligeiramente o card ao passar o mouse */
+    box-shadow: 0 4px 8px rgba(102, 45, 145, 0.2);
+}
+
+/* Rodapé */
+footer {
+    margin-top: 20px;
+    text-align: center;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+}
+
+footer a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+.input-container {
+    display: flex;
+    align-items: center;
+}
+
+#product-price {
+    height: 40px;
+    padding-left: 35px; /* espaço para o "R$" */
+    padding-right: 10px; /* para o texto não encostar na borda */
+    font-size: 1.2em;
+    width: 200px;
+    border-radius: 5px;
+}
+
+.product-actions {
+    margin-top: 10px;
+}
+
+.remove-btn,
+.edit-btn {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.remove-btn:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+}
+
+.edit-btn {
+    background-color: #ffc107;
+}
+
+.edit-btn:hover {
+    background-color: #e0a800;
+    transform: scale(1.05);
+}

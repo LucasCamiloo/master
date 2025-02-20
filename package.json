@@ -1,0 +1,28 @@
+{
+  "name": "master",
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": "18.x"
+  },
+  "main": "master.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.21.2",
+    "mongoose": "^8.9.5",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^3.3.2",
+    "node-localstorage": "^3.0.5"
+  },
+  "scripts": {
+    "start": "node master.js",
+    "vercel-build": "echo 'Built successfully'",
+    "dev": "node master.js",
+    "build": "npm install"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

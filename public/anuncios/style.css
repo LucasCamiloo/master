@@ -1,0 +1,1006 @@
+body {
+  background-color: #f4f4f4;
+}
+
+.ad-preview,
+#slidesContainer {
+  background: linear-gradient(to bottom, #ffffff, #e7f0fa);
+  color: #333;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.ad-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 50px;
+  margin-bottom: 40px;
+}
+
+.ad-header img {
+  max-height: 90px;
+}
+
+.products-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  flex-direction: row;
+  width: 100%;
+  padding: 20px 60px;
+  margin: 40px 0;
+  gap: 80px;
+}
+
+.product {
+  flex: 0 1 40%;
+  margin: 20px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.product img {
+  max-width: 280px;
+  max-height: 280px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  object-fit: contain;
+}
+
+.product-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+
+.product-price {
+  font-size: 32px;
+  color: var(--primary-color);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+.product-description {
+  font-size: 16px;
+  color: #555;
+  margin: 15px 0;
+  line-height: 1.6;
+}
+
+.ad-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+#slidesPreview {
+  margin-top: 30px;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#slidesList {
+  list-style-type: none;
+  padding: 0;
+}
+
+#slidesList li {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#slidesList li img {
+  max-width: 80px;
+  margin-right: 15px;
+}
+
+#slidesList li .slide-info {
+  flex: 1;
+}
+
+#slidesList li .remove-slide {
+  background-color: #ff6b6b;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+#slidesList li .remove-slide:hover {
+  background-color: #e63939;
+}
+
+/* Add these styles for both preview and display */
+.ad-container {
+  width: 1920px;
+  height: 1080px;
+  position: relative;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+/* Two Products Layout */
+.products-container {
+  position: absolute;
+  width: 1200px;
+  height: 400px;
+  left: 50%;
+  top: 52%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 100px;
+  border-radius: 15px;
+  padding: 20px;
+}
+
+.product {
+  width: 400px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.product img {
+  width: 250px;
+  height: 200px;
+  object-fit: contain;
+  margin-bottom: 20px;
+  background: transparent;
+}
+
+/* List Layout */
+.products-list-container {
+  position: absolute;
+  width: 80%;
+  max-width: 1400px;
+  height: auto;
+  max-height: 800px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  overflow-y: auto;
+  padding: 30px;
+}
+
+.product-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  margin: 10px 0;
+  padding: 15px 30px;
+  border-radius: 8px;
+}
+
+.product-list-name {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.product-list-price {
+  font-size: 24px;
+  font-weight: bold;
+  color: #d9534f;
+}
+
+.product-list-item.highlight {
+  background-color: #d9534f;
+  color: white;
+}
+
+.slides-preview-container {
+  margin-top: 20px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.slides-preview-content {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+.slide-preview {
+  position: relative;
+  min-width: 160px;
+  height: 90px;
+  background: #2a2a2a;
+  border: 2px solid #3a3a3a;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.slide-preview.active {
+  border-color: var(--primary-color);
+}
+
+.slide-preview:hover {
+  transform: translateY(-2px);
+  border-color: #4a4a4a;
+}
+
+.slide-preview .thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slide-preview .remove-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: rgba(220, 53, 69, 0.8);
+  color: white;
+  border: none;
+  border-radius: 3px;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.slide-preview:hover .remove-btn {
+  opacity: 1;
+}
+
+.slide-preview .slide-number {
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.slides-preview-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #1a1a1a;
+  color: white;
+  z-index: 1000;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+}
+
+.slides-preview-bar h4 {
+  margin: 0 0 10px 0;
+  padding: 0 10px;
+}
+
+/* Variáveis globais */
+:root {
+  --primary-color: #662d91;
+  --primary-light: #8347af;
+  --primary-dark: #4a1d6e;
+  --primary-transparent: rgba(102, 45, 145, 0.1);
+  --secondary-color: #8347af;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --dark-bg: #1a1a1a;
+  --light-bg: #f8f9fa;
+  --border-radius: 8px;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --transition-speed: 0.3s;
+}
+
+/* Reset e estilos base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+  color: #333;
+}
+
+/* Utilitários */
+.fade-in {
+  animation: fadeIn var(--transition-speed) ease-in;
+}
+
+.shadow-sm {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Media Queries */
+@media (max-width: 992px) {
+  :root {
+    --spacing-lg: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  :root {
+    --spacing-md: 0.75rem;
+    --spacing-lg: 1rem;
+  }
+}
+
+/* Estilos para as seções de produtos */
+.product-content {
+  display: none;
+  padding: 15px;
+  border: 1px solid #dee2e6;
+  border-radius: 0 0 8px 8px;
+  margin-top: -1px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.product-header {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+  transition: background-color 0.3s ease;
+}
+
+.product-header:hover {
+  background-color: #e9ecef;
+}
+
+.toggle-icon {
+  transition: transform 0.3s ease;
+}
+
+.toggle-icon.expanded {
+  transform: rotate(180deg);
+}
+
+/* Estilos para os botões de tipo de anúncio */
+.ad-type-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.ad-type-button {
+  position: relative;
+  padding: 10px 20px;
+  border: 2px solid var(--primary-color);
+  background-color: transparent;
+  color: var(--primary-color);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.ad-type-button.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.ad-type-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ad-type-button:hover:not(.active) {
+  background-color: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+/* Correções para a pré-visualização */
+.preview-container {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%; /* Mantém proporção 16:9 */
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.ad-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ad-preview .slide {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.ad-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-size: cover !important;
+  background-position: center !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Correções para o modal de pré-visualização */
+#previewAdModal .modal-dialog {
+  max-width: 90vw;
+  height: 90vh;
+  margin: 5vh auto;
+}
+
+#previewAdModal .modal-content {
+  height: 100%;
+  background: #000;
+}
+
+#previewAdModal .modal-body {
+  height: calc(100% - 60px); /* Subtrai altura do header */
+  padding: 0;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+#previewAdContent {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+#previewAdContent .slide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  height: 90%;
+  display: none;
+}
+
+#previewAdContent .slide.active {
+  display: block;
+}
+
+/* Ajustes para os controles de navegação */
+.slide-nav {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  z-index: 1000;
+}
+
+.slide-nav button {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.slide-nav button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Timeline de Slides estilo PowerPoint */
+.timeline-slides {
+  display: flex;
+  gap: 10px;
+  padding: 15px;
+  overflow-x: auto;
+  background: #f0f0f0;
+  border-top: 1px solid #ddd;
+  min-height: 150px;
+}
+
+.timeline-slide {
+  position: relative;
+  width: 200px;
+  height: 120px;
+  flex-shrink: 0;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.timeline-slide.active {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.3);
+}
+
+.timeline-slide:hover {
+  transform: translateY(-2px);
+}
+
+.timeline-slide .thumbnail {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+}
+
+.timeline-slide .remove-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.timeline-slide:hover .remove-btn {
+  opacity: 1;
+}
+
+.timeline-slide .remove-btn:hover {
+  background: #dc3545;
+  color: white;
+}
+
+.timeline-slide .slide-number {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* Estilo para o layout de lista */
+.list-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  height: 100%;
+  padding: 40px;
+  gap: 40px;
+}
+
+.product-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+}
+
+.featured-image-container {
+  width: 100%;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.featured-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.featured-info {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.featured-name {
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.featured-price {
+  font-size: 28px;
+  color: #d9534f;
+  font-weight: bold;
+}
+
+.products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+}
+
+.product-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+/* Correções para o preview e slides */
+.preview-container {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%; /* Proporção 16:9 */
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.ad-preview {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ad-preview .slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Aumentar a escala do container do anúncio */
+.ad-container {
+    width: 1920px;
+    height: 1080px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.75); /* Aumentado de 0.35 para 0.75 */
+    transform-origin: center;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Ajustes para timeline slides */
+.timeline-slide {
+    position: relative;
+    width: 280px; /* Aumentado de 200px para 280px */
+    height: 160px; /* Aumentado de 120px para 160px */
+    flex-shrink: 0;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.timeline-slides {
+    display: flex;
+    gap: 15px; /* Aumentado de 10px para 15px */
+    padding: 20px;
+    overflow-x: auto;
+    background: #f0f0f0;
+    border-top: 1px solid #ddd;
+    min-height: 200px; /* Aumentado de 150px para 200px */
+}
+
+/* Ajustes para o modal de preview */
+#previewAdModal .modal-dialog {
+    max-width: 95vw; /* Aumentado de 90vw para 95vw */
+    height: 95vh; /* Aumentado de 90vh para 95vh */
+    margin: 2.5vh auto;
+}
+
+#previewAdModal .modal-content {
+    height: 100%;
+    background: #000;
+}
+
+#previewAdModal .modal-body {
+    padding: 0;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#previewAdContent {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+#previewAdContent .slide {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+}
+
+#previewAdContent .slide.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#previewAdContent .ad-container {
+    transform: translate(-50%, -50%) scale(0.95); /* Aumentado de 0.8 para 0.95 */
+}
+
+/* Ajustes para navegação de slides */
+.slide-nav {
+    position: absolute;
+    bottom: 30px; /* Aumentado de 20px para 30px */
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 30px; /* Aumentado de 20px para 30px */
+    z-index: 1000;
+}
+
+.slide-nav button {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid white;
+    padding: 12px 24px; /* Aumentado de 10px 20px para 12px 24px */
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px; /* Adicionado tamanho de fonte */
+}
+
+.slide-nav button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.saved-ad-title {
+    color: var(--primary-color);
+}
+
+/* Estilos para a grid de anúncios salvos */
+.saved-ads-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.saved-ad-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(102, 45, 145, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.saved-ad-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(102, 45, 145, 0.2);
+}
+
+.saved-ad-thumbnail {
+    width: 100%;
+    height: 150px;
+    background-size: cover;
+    background-position: center;
+    background-color: #f5f5f5;
+}
+
+.saved-ad-info {
+    padding: 15px;
+}
+
+.saved-ad-buttons {
+    display: flex;
+    gap: 10px;
+    padding: 10px 15px;
+    background: #f8f9fa;
+}
+
+.saved-ad-buttons .btn {
+    flex: 1;
+}
+
+/* Ajustes para a timeline */
+.timeline-container {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.timeline-content {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding: 10px 0;
+}
+
+#timelineSlides {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding: 10px 0;
+    min-height: 140px;
+    align-items: center;
+}
+
+.timeline-slide {
+    position: relative;
+    min-width: 200px;
+    height: 120px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.timeline-slide.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--primary-transparent);
+    transform: translateY(-2px);
+}
+
+.timeline-slide:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.timeline-slide .thumbnail {
+    width: 100%;
+    height: 100%;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+.timeline-slide .slide-content {
+    transform: scale(0.15);
+    transform-origin: top left;
+    width: 667%;
+    height: 667%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.timeline-slide .remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 1;
+}
+
+.timeline-slide:hover .remove-btn {
+    opacity: 1;
+}
+
+.timeline-slide .slide-number {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1;
+}
+
+/* Adicionar estado vazio */
+.empty-state {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 1.2rem;
+}
+

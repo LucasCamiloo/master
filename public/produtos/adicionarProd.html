@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device=width, initial-scale=1.0">
+    <title>Gerenciamento de Produtos</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #662d91;
+            --primary-light: #8347af;
+            --primary-dark: #4a1d6e;
+            --primary-transparent: rgba(102, 45, 145, 0.1);
+            --secondary-color: #8347af;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --dark-bg: #1a1a1a;
+            --light-bg: #f8f9fa;
+            --border-radius: 8px;
+        }
+
+        body {
+            background-color: var(--light-bg);
+        }
+
+        .navbar {
+            background-color: var(--primary-color) !important;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary-light);
+        }
+
+        main.container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 8px rgba(102, 45, 145, 0.1);
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem var(--primary-transparent);
+        }
+
+        .form-label {
+            color: var(--primary-dark);
+        }
+    </style>
+</head>
+<body>
+
+<!-- BARRA DE NAVEGAÇÃO BOOTSTRAP -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <img src="/LOGO_DYP.png" alt="Logo DYP" height="30">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" 
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">
+                        <i class="bi bi-house"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/anuncios">
+                        <i class="bi bi-image"></i> Anúncios
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-box"></i> Produtos
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="/produtos/adicionarProd">
+                                <i class="bi bi-plus-circle"></i> Adicionar Produto
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/produtos/product-list">
+                                <i class="bi bi-list"></i> Lista de Produtos
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+  </nav>
+
+
+    <!-- Página de Adição de Produtos -->
+    <main class="container my-5">
+        <section id="form-section" class="container">
+            <h2 class="mb-4">Preencha as informações do produto</h2>
+            <form id="product-form" class="mb-4">
+                <div class="mb-3">
+                    <label for="product-name" class="form-label">Nome do Produto:</label>
+                    <input type="text" class="form-control" id="product-name" name="product-name" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="product-image-url" class="form-label">Link da Foto do Produto:</label>
+                    <input type="text" class="form-control" id="product-image-url" name="product-image-url">
+                </div>
+
+                <div class="mb-3">
+                    <label for="product-description" class="form-label">Descrição do Produto: (máx. 180 caracteres)</label>
+                    <textarea class="form-control" id="product-description" name="product-description" rows="5" 
+                        required maxlength="180" 
+                        oninput="document.getElementById('char-count').textContent = this.value.length + '/180'"></textarea>
+                    <small id="char-count" class="text-muted">0/180</small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="product-price" class="form-label">Preço do Produto:</label>
+                    <input type="text" class="form-control" id="product-price" name="product-price" value="R$ " required onfocus="this.select()" oninput="formatPrice(this)">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Salvar Produto</button>
+            </form>
+            <hr>
+            <h2 class="mb-4">Importar Produtos de Arquivo</h2>
+            <form id="import-form" onsubmit="return false;">
+                <div class="mb-3">
+                    <label for="import-file" class="form-label">Arquivo de Produtos (TXT):</label>
+                    <input type="file" class="form-control" id="import-file" name="import-file" accept=".txt">
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="importProducts()">Importar Produtos</button>
+            </form>
+            <div id="loading" class="mt-3" style="display: none;">Carregando produtos...</div> <!-- Loading indicator -->
+        </section>
+    </main>
+
+    <script>
+        const MASTER_URL = 'https://master-teste.vercel.app';
+
+        document.getElementById('product-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            // Pegar os dados do formulário
+            const productData = {
+                name: document.getElementById('product-name').value,
+                description: document.getElementById('product-description').value,
+                price: document.getElementById('product-price').value,
+                imageUrl: document.getElementById('product-image-url').value.trim()
+            };
+
+            try {
+                console.log('Enviando produto:', productData);
+
+                const response = await fetch(`${MASTER_URL}/api/products`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(productData)
+                });
+
+                const data = await response.json();
+                console.log('Resposta do servidor:', data);
+
+                if (data.success) {
+                    alert('Produto salvo com sucesso!');
+                    window.location.href = 'product-list.html';
+                } else {
+                    throw new Error(data.message || 'Erro ao salvar produto');
+                }
+            } catch (error) {
+                console.error('Erro ao salvar:', error);
+                alert('Erro ao salvar: ' + error.message);
+            }
+        });
+
+        function formatPrice(input) {
+            let value = input.value.replace(/\D/g, '');
+            value = (value / 100).toFixed(2) + '';
+            value = value.replace('.', ',');
+            value = value.replace(/(\d)(?=(\d{3})+\,)/g, '$1.');
+            input.value = 'R$ ' + value;
+        }
+
+        async function importProducts() {
+            const fileInput = document.getElementById('import-file');
+            if (!fileInput.files.length) {
+                alert('Por favor, selecione um arquivo.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function(event) {
+                try {
+                    const content = event.target.result;
+                    const products = JSON.parse(content);
+                    document.getElementById('loading').style.display = 'block';
+
+                    for (const item of products) {
+                        const product = item.produto;
+                        const formData = new FormData();
+                        formData.append('name', product.nome);
+                        formData.append('description', product.descricao.substring(0, 180));
+                        formData.append('price', `R$ ${product.preco}`);
+
+                        if (product.foto) {
+                            try {
+                                // Use the proxy endpoint to fetch the image
+                                const proxyUrl = `${MASTER_URL}/proxy?url=${encodeURIComponent(product.foto)}`;
+                                const imageResponse = await fetch(proxyUrl);
+                                
+                                if (!imageResponse.ok) {
+                                    throw new Error('Failed to fetch image through proxy');
+                                }
+
+                                const blob = await imageResponse.blob();
+                                formData.append('image', blob, 'product-image.jpg');
+                            } catch (imageError) {
+                                console.error('Error processing image:', imageError);
+                                // Continue without image if there's an error
+                            }
+                        }
+
+                        try {
+                            const saveResponse = await fetch(`${MASTER_URL}/api/products`, {
+                                method: 'POST',
+                                body: formData
+                            });
+
+                            if (!saveResponse.ok) throw new Error('Failed to save product');
+                            console.log('Product saved successfully');
+                        } catch (error) {
+                            console.error('Error saving product:', error);
+                        }
+                    }
+
+                    document.getElementById('loading').style.display = 'none';
+                    alert('Produtos importados com sucesso!');
+                    window.location.href = 'product-list.html';
+                } catch (error) {
+                    document.getElementById('loading').style.display = 'none';
+                    console.error('Error processing file:', error);
+                    alert('Erro ao processar arquivo: ' + error.message);
+                }
+            };
+
+            reader.readAsText(file);
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

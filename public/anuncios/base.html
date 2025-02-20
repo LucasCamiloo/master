@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Anúncios</title>
+  
+  <!-- CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+
+  <!-- JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Global Functions -->
+  <script>
+    function selectExistingProduct(productId, productNumber) {
+        loadProduct(productId, productNumber);
+    }
+
+    function filterProducts(productNumber) {
+        const searchInput = document.getElementById(`product${productNumber}Search`).value.toLowerCase();
+        const selectElement = document.getElementById(`product${productNumber}Select`);
+        
+        // Hide options that don't match search
+        Array.from(selectElement.options).forEach(option => {
+            const text = option.text.toLowerCase();
+            option.style.display = text.includes(searchInput) ? '' : 'none';
+        });
+    }
+  </script>
+
+  <!-- Main Script -->
+  <script src="script.js" defer></script>
+  <style>
+    .product-preview {
+      max-width: 200px;
+      margin-top: 10px;
+    }
+    
+    .slide-nav {
+        margin-top: 20px;
+        text-align: center;
+    }
+    
+    .slide-nav button {
+        margin: 0 10px;
+        padding: 5px 15px;
+    }
+    
+    #previewAdContent .slide {
+        transition: opacity 0.3s ease-in-out;
+    }
+    
+    .saved-ad {
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        text-align: center;
+    }
+    
+    #previewAdContent .slide {
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+        position: absolute;
+        width: 100%;
+    }
+    
+    #previewAdContent .slide.active {
+        opacity: 1;
+    }
+    
+    #previewAdContent {
+        position: relative;
+        min-height: 500px;
+    }
+    
+    .slide-nav {
+        position: relative;
+        z-index: 2;
+        margin-top: 20px;
+        text-align: center;
+    }
+    
+    .slide-nav button {
+        margin: 0 10px;
+        padding: 5px 15px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .slide-nav button:hover {
+        background: #0056b3;
+    }
+    
+    #previewAdContent .slide {
+        width: 1920px;
+        height: 1080px;
+        transform: scale(0.5);
+        transform-origin: top center;
+        margin-bottom: -270px; /* Compensate for the scale */
+    }
+    
+    #previewAdContent .slide .ad-container {
+        background-size: 1920px 1080px !important;
+        background-repeat: no-repeat !important;
+        background-position: center !important;
+        width: 100%;
+        height: 100%;
+    }
+    
+    /* Adjust modal size to fit the scaled preview */
+    .modal-xl {
+        max-width: 1000px !important;
+    }
+
+    body {
+        overflow: hidden;
+        background-color: #f5f5f5;
+    }
+
+    .split-layout {
+        display: flex;
+        height: calc(100vh - 56px); /* Subtract navbar height */
+        position: relative;
+    }
+
+    .left-panel {
+        flex: 0 0 50%;
+        overflow-y: auto;
+        padding: 20px;
+        background-color: white;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    .right-panel {
+        flex: 0 0 50%;
+        padding: 20px;
+        background-color: #f8f9fa;
+        position: sticky;
+        top: 0;
+        height: calc(100vh - 56px);
+        overflow-y: auto;
+    }
+
+    .form-section {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .preview-container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    #slidesList {
+        list-style: none;
+        padding: 0;
+    }
+
+    #slidesList li {
+        background: white;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .control-label {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 8px;
+    }
+
+    .product-section {
+        border-left: 4px solid #007bff;
+        padding-left: 15px;
+        margin-bottom: 25px;
+    }
+
+    /* Reduce preview size to fit better */
+    #previewAdContent .slide {
+        transform: scale(0.4);
+        margin-bottom: -400px;
+    }
+
+    .saved-ad-card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+    }
+
+    .saved-ad-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .saved-ad-title {
+        margin: 0 0 10px 0;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    .saved-ad-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-start;
+    }
+
+    .saved-ad-buttons .btn {
+        padding: 4px 8px;
+        font-size: 0.875rem;
+    }
+
+    .saved-ad-buttons i {
+        margin-right: 4px;
+    }
+
+    .product-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+
+    .product-header:hover {
+        background: #e9ecef;
+    }
+
+    .product-content {
+        display: none;
+    }
+
+    .product-content.expanded {
+        display: block;
+    }
+
+    .toggle-icon {
+        transition: transform 0.3s;
+    }
+
+    .toggle-icon.expanded {
+        transform: rotate(180deg);
+    }
+
+    .saved-ad-buttons button {
+        padding: 6px 12px;
+        margin: 0 5px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .saved-ad-card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Update preview sizing */
+    .preview-container {
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .ad-preview {
+        transform: scale(0.25);
+        transform-origin: top left;
+        margin-bottom: -800px; /* Adjust this value based on your content */
+    }
+
+    /* Modal preview styles */
+    #previewAdModal .modal-dialog {
+        max-width: 90vw;
+    }
+
+    #previewAdModal .modal-body {
+        padding: 0;
+        background: #000;
+        position: relative;
+        min-height: 600px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #previewAdModal .slide {
+        transform: scale(0.4);
+        transform-origin: center;
+        margin: 0 auto;
+    }
+
+    #previewAdModal .slide .ad-container {
+        width: 1920px;
+        height: 1080px;
+    }
+
+    /* Navigation buttons for modal */
+    #previewAdModal .slide-nav {
+        position: absolute;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+    }
+
+    #previewAdModal .slide-nav button {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid white;
+        color: white;
+        padding: 8px 16px;
+        margin: 0 5px;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+    }
+
+    #previewAdModal .slide-nav button:hover {
+        background: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Update preview container and scaling */
+    .preview-container {
+        width: 100%;
+        overflow: hidden;
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    .ad-preview {
+        width: 1920px;
+        height: 1080px;
+        transform: scale(0.25);
+        transform-origin: top left;
+        margin-bottom: -810px; /* Adjust based on content height after scaling */
+    }
+
+    .ad-container {
+        width: 1920px !important;
+        height: 1080px !important;
+        position: relative;
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+    }
+
+    .products-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 100px;
+        padding: 40px;
+    }
+
+    .product {
+        width: 600px;
+        height: auto;
+        max-height: 900px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+    }
+
+    .product img {
+        width: 400px;
+        height: 300px;
+        object-fit: contain;
+        margin-bottom: 20px;
+    }
+
+    .product-title {
+        font-size: 32px;
+        font-weight: bold;
+        text-align: center;
+        margin: 10px 0;
+    }
+
+    .product-description {
+        font-size: 24px;
+        text-align: center;
+        margin: 10px 0;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .product-price {
+        font-size: 48px;
+        color: #d9534f;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    /* Modal preview adjustments */
+    #previewAdModal .modal-dialog {
+        max-width: 95vw;
+        margin: 20px auto;
+    }
+
+    #previewAdModal .modal-body {
+        padding: 0;
+        background: #000;
+        height: 85vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    #previewAdModal .slide {
+        transform: scale(0.45);
+        transform-origin: center;
+    }
+
+    #previewAdModal .ad-container {
+        margin: 0 auto;
+    }
+
+    /* Larger navigation buttons */
+    .slide-nav button {
+        margin: 0 20px;
+        padding: 12px 24px;
+        font-size: 1.2rem;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .slide-nav button:hover {
+        background: #0056b3;
+        transform: scale(1.05);
+    }
+
+    /* Fix modal preview */
+    #previewAdModal .modal-dialog {
+        max-width: 95vw;
+        margin: 10px auto;
+    }
+
+    #previewAdModal .modal-body {
+        background: white;
+        padding: 20px;
+        min-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #previewAdModal .slide {
+        transform: scale(0.45);
+        transform-origin: top center;
+        margin-bottom: -200px;
+    }
+
+    #previewAdModal .ad-container {
+        width: 1920px !important;
+        height: 1080px !important;
+        background-size: cover !important;
+    }
+
+    #previewAdModal .slide-nav {
+        position: fixed;
+        bottom: 40px;
+        left: 0;
+        right: 0;
+        z-index: 1050;
+    }
+
+    .products-list-container {
+        width: 100%;
+        height: 100%;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        overflow-y: auto;
+        max-height: 1000px;
+    }
+
+    .product-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 8px;
+        margin: 5px 0;
+    }
+
+    .product-list-name {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .product-list-price {
+        font-size: 24px;
+        font-weight: bold;
+        color: #d9534f;
+    }
+
+    #twoProductsSection {
+        display: block;
+    }
+
+    #twoProductsSection.hidden {
+        display: none;
+    }
+
+    /* Update modal preview styles */
+    #previewAdModal .modal-body {
+        background: black;
+        padding: 0;
+        min-height: 80vh;
+        position: relative;
+    }
+
+    #previewAdContent .slide {
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.45);
+        width: 1920px;
+        height: 1080px;
+    }
+
+    #previewAdContent .slide.active {
+        opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <!-- BARRA DE NAVEGAÇÃO BOOTSTRAP -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-display"></i> Projeto Telao
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="../index.html">
+                        <i class="bi bi-house"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="index.html">
+                        <i class="bi bi-image"></i> Anúncios
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../telas/index.html">
+                        <i class="bi bi-display"></i> Telas
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-box"></i> Produtos
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="../produtos/adicionarProd.html">
+                                <i class="bi bi-plus-circle"></i> Adicionar Produto
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="../produtos/product-list.html">
+                                <i class="bi bi-list"></i> Lista de Produtos
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+  <!-- Fim da barra de navegação-->
+
+  <div class="container my-4">
+    <div class="row split-layout">
+      <div class="col-md-6 left-panel">
+        <h2 class="mb-4">Configuração do Anúncio</h2>
+        
+        <!-- Tipo de Anúncio -->
+        <div class="form-section">
+            <h4>Tipo de Anúncio</h4>
+            <div class="ad-type-buttons">
+                <button class="btn btn-outline-primary ad-type-button active" data-ad-type="twoProducts" onclick="toggleAdType('twoProducts')">
+                    <i class="bi bi-box-seam"></i> 2 Produtos
+                </button>
+                <button class="btn btn-outline-primary ad-type-button" data-ad-type="productList" onclick="toggleAdType('productList')">
+                    <i class="bi bi-list-ul"></i> Lista de Produtos
+                </button>
+                <button class="btn btn-outline-primary ad-type-button" data-ad-type="video" onclick="toggleAdType('video')">
+                    <i class="bi bi-camera-video"></i> Vídeo
+                </button>
+            </div>
+        </div>
+
+        <!-- Seções de Produtos e Vídeo -->
+        <div id="twoProductsSection">
+            <div class="form-section">
+                <div class="product-section">
+                    <div class="product-header" onclick="toggleProduct(1)">
+                        <h4>Produto 1</h4>
+                        <i class="bi bi-chevron-down toggle-icon" id="toggle-icon-1"></i>
+                    </div>
+                    <div class="product-content" id="product-content-1">
+                        <label for="product1Search" class="control-label">Pesquisar Produto 1</label>
+                        <input type="text" id="product1Search" class="form-control" oninput="filterProducts(1)">
+                        <label for="product1Select" class="form-label mt-2">Selecione o Produto 1</label>
+                        <select id="product1Select" class="form-select" onchange="selectExistingProduct(this.value, 1)">
+                          <option value="">Selecione um produto</option>
+                        </select>
+                        <label for="product1Title" class="form-label mt-2">Título do Produto 1</label>
+                        <input type="text" id="product1Title" class="form-control">
+                        <label for="product1Description" class="form-label mt-2">Descrição do Produto 1</label>
+                        <textarea id="product1Description" class="form-control" rows="2"></textarea>
+                        <label for="product1Price" class="form-label mt-2">Preço do Produto 1</label>
+                        <input type="text" id="product1Price" class="form-control">
+                        <label for="product1Image" class="form-label mt-2">Imagem do Produto 1</label>
+                        <input type="file" id="product1Image" class="form-control" data-imageUrl="">
+                    </div>
+                </div>
+
+                <div class="product-section">
+                    <div class="product-header" onclick="toggleProduct(2)">
+                        <h4>Produto 2</h4>
+                        <i class="bi bi-chevron-down toggle-icon" id="toggle-icon-2"></i>
+                    </div>
+                    <div class="product-content" id="product-content-2">
+                        <label for="product2Search" class="control-label">Pesquisar Produto 2</label>
+                        <input type="text" id="product2Search" class="form-control" oninput="filterProducts(2)">
+                        <label for="product2Select" class="form-label mt-2">Selecione o Produto 2</label>
+                        <select id="product2Select" class="form-select" onchange="selectExistingProduct(this.value, 2)">
+                          <option value="">Selecione um produto</option>
+                        </select>
+                        <label for="product2Title" class="form-label mt-2">Título do Produto 2</label>
+                        <input type="text" id="product2Title" class="form-control">
+                        <label for="product2Description" class="form-label mt-2">Descrição do Produto 2</label>
+                        <textarea id="product2Description" class="form-control" rows="2"></textarea>
+                        <label for="product2Price" class="form-label mt-2">Preço do Produto 2</label>
+                        <input type="text" id="product2Price" class="form-control">
+                        <label for="product2Image" class="form-label mt-2">Imagem do Produto 2</label>
+                        <input type="file" id="product2Image" class="form-control" data-imageUrl="">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Adicionar esta nova seção -->
+        <div id="productListSection" class="form-section" style="display: none;">
+            <h4>Selecionar Produtos para Lista</h4>
+            <div class="mb-3">
+                <div id="productCheckboxes" class="product-selection">
+                    <!-- Checkboxes serão inseridos aqui dinamicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Atualizar o elemento de input de vídeo -->
+        <div id="videoSection" class="form-section" style="display: none;">
+            <h4>Adicionar Vídeo</h4>
+            <div class="mb-3">
+                <label for="videoInput" class="form-label">Selecione o Vídeo</label>
+                <input type="file" 
+                       id="videoInput" 
+                       class="form-control" 
+                       accept="video/*"
+                       onchange="handleVideoUpload(this.files[0])">
+                <small class="form-text text-muted">Formatos suportados: MP4, WebM (máx: 100MB)</small>
+            </div>
+        </div>
+
+        <!-- Update the slide configuration section to be conditional -->
+        <div class="form-section" id="slideConfigSection">
+            <h4>Configurações do Slide</h4>
+            <div class="mb-3">
+                <label for="backgroundSelect" class="control-label">Escolha o fundo:</label>
+                <select id="backgroundSelect" class="form-select">
+                    <optgroup label="Fundos para 2 Produtos">
+                        <option value="twoProducts1">Fundo Duo 1</option>
+                        <option value="twoProducts2">Fundo Duo 2</option>
+                        <option value="twoProducts3">Fundo Duo 3</option>
+                    </optgroup>
+                    <optgroup label="Fundos para Lista">
+                        <option value="list1">Fundo Lista 1</option>
+                        <option value="list2">Fundo Lista 2</option>
+                        <option value="list3">Fundo Lista 3</option>
+                    </optgroup>
+                </select>
+                <i class="bi bi-info-circle" data-bs-toggle="modal" data-bs-target="#backgroundModal" style="cursor: pointer;"></i>
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="btn-group d-flex justify-content-between">
+            <button id="addAd" class="btn btn-success" data-tooltip="Adicionar novo slide ao anúncio">
+                <i class="bi bi-plus-lg"></i> Adicionar Slide
+            </button>
+            <button id="saveAd" class="btn btn-primary">
+                <i class="bi bi-save"></i> Salvar Anúncio
+            </button>
+        </div>
+
+      </div>
+
+      <div class="col-md-6 right-panel">
+        <!-- Pré-visualização do Anúncio -->
+        <div class="preview-container">
+          <h3 class="mb-4">Pré-visualização do Anúncio</h3>
+          <div id="adPreview" class="ad-preview">
+            <!-- Slides will be inserted here -->
+          </div>
+        </div>
+
+        <!-- Anúncios Salvos -->
+        <div class="form-section mt-4">
+          <h3>Anúncios Salvos</h3>
+          <div id="savedAdsList" class="saved-ads-container">
+            <!-- Anúncios salvos serão carregados aqui -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para pré-visualização de anúncios -->
+  <div class="modal fade" id="previewAdModal" tabindex="-1">
+    <div class="modal-dialog modal-xl"> <!-- Change to modal-xl for wider modal -->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="previewAdModalLabel">Pré-visualização do Anúncio</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="previewAdContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for displaying backgrounds -->
+  <div class="modal fade" id="backgroundModal" tabindex="-1" aria-labelledby="backgroundModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="backgroundModalLabel">Fundos Disponíveis</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <img src="http://localhost:4000/fundos/duo1.jpg" alt="Fundo 1 (Dois Produtos)" class="img-fluid">
+                        <p>Fundo 1 (Dois Produtos)</p>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="http://localhost:4000/fundos/duo2.jpg" alt="Fundo 2 (Dois Produtos)" class="img-fluid">
+                        <p>Fundo 2 (Dois Produtos)</p>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="http://localhost:4000/fundos/duo3.jpg" alt="Fundo 3 (Dois Produtos)" class="img-fluid">
+                        <p>Fundo 3 (Dois Produtos)</p>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="http://localhost:4000/fundos/list1.jpg" alt="Fundo 1 (Lista)" class="img-fluid">
+                        <p>Fundo 1 (Lista)</p>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="http://localhost:4000/fundos/list2.jpg" alt="Fundo 2 (Lista)" class="img-fluid">
+                        <p>Fundo 2 (Lista)</p>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="http://localhost:4000/fundos/list3.jpg" alt="Fundo 3 (Lista)" class="img-fluid">
+                        <p>Fundo 3 (Lista)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Add Save Modal -->
+  <div class="modal fade" id="saveAdModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="saveAdModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="saveAdModalLabel">Salvar Anúncio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="adTitleModal" class="form-label">Título do Anúncio:</label>
+                    <input type="text" id="adTitleModal" class="form-control" 
+                           placeholder="Digite um título para identificar este anúncio">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeAndClearModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="handleSaveAndClose()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+  <!-- Add fixed slides preview bar before closing body tag -->
+  <div class="slides-preview-bar" id="slidesPreviewBar">
+    <!-- Slides thumbnails will be inserted here -->
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadExistingProducts();
+        toggleProduct(1);
+
+        // Add event listener for video input
+        const videoInput = document.getElementById('videoInput');
+        if (videoInput) {
+          videoInput.addEventListener('change', uploadVideo);
+        }
+    });
+
+    async function loadExistingProducts() {
+        try {
+            const response = await fetch('http://localhost:4000/api/products');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                const product1Select = document.getElementById('product1Select');
+                const product2Select = document.getElementById('product2Select');
+
+                if (!product1Select || !product2Select) {
+                    console.error('Elementos de seleção de produtos não encontrados');
+                    return;
+                }
+
+                const options = data.products.map(product => 
+                    `<option value="${product.id}">${product.name}</option>`
+                ).join('');
+
+                const defaultOption = '<option value="">Selecione um produto</option>';
+                product1Select.innerHTML = defaultOption + options;
+                product2Select.innerHTML = defaultOption + options;
+            }
+        } catch (error) {
+            console.error('Erro ao carregar produtos:', error);
+        }
+    }
+
+    async function selectExistingProduct(productId, productNumber) {
+        try {
+            console.log(`Fetching product with ID: ${productId}`); // Debug log
+            const response = await fetch(`http://localhost:4000/api/products/${productId}`);
+            if (!response.ok) {
+                throw new Error('Falha ao carregar produto');
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                const product = data.product;
+                document.getElementById(`product${productNumber}Title`).value = product.name;
+                document.getElementById(`product${productNumber}Description`).value = product.description;
+                document.getElementById(`product${productNumber}Price`).value = product.price;
+                document.getElementById(`product${productNumber}Image`).dataset.imageUrl = product.imageUrl;
+
+                // Mostrar a imagem do produto
+                const imageContainer = document.getElementById(`product${productNumber}Image`).parentNode;
+                const existingImage = imageContainer.querySelector('img');
+                if (existingImage) {
+                    existingImage.src = product.imageUrl;
+                } else {
+                    const imagePreview = document.createElement('img');
+                    imagePreview.src = product.imageUrl;
+                    imagePreview.style.maxWidth = '100%';
+                    imageContainer.appendChild(imagePreview);
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao selecionar produto:', error);
+        }
+    }
+
+    function filterProducts(productNumber) {
+        const searchInput = document.getElementById(`product${productNumber}Search`).value.toLowerCase();
+        const selectElement = document.getElementById(`product${productNumber}Select`);
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+
+        selectElement.innerHTML = products
+            .filter(product => product.name.toLowerCase().includes(searchInput))
+            .map((product, index) => `<option value="${index}">${product.name}</option>`)
+            .join('');
+    }
+
+    async function loadSavedAds() {
+      try {
+          const response = await fetch('http://localhost:4000/api/ads');
+          if (!response.ok) {
+              throw new Error('Falha ao carregar anúncios');
+          }
+
+          const data = await response.json();
+          if (data.success) {
+              const container = document.getElementById('savedAdsList');
+              container.innerHTML = data.ads.map(ad => `
+                  <div class="saved-ad-card">
+                      <h5 class="saved-ad-title">${ad.title}</h5>
+                      <div class="saved-ad-buttons">
+                          <button class="btn btn-sm btn-primary" onclick="previewAd('${ad.id}')">
+                              <i class="bi bi-eye"></i> Visualizar
+                          </button>
+                          <button class="btn btn-sm btn-success" onclick="useAd('${ad.id}')">
+                              <i class="bi bi-check2-circle"></i> Usar
+                          </button>
+                          <button class="btn btn-sm btn-danger" onclick="deleteAd('${ad.id}')">
+                              <i class="bi bi-trash"></i> Excluir
+                          </button>
+                      </div>
+                  </div>
+              `).join('');
+          }
+      } catch (error) {
+          console.error('Erro ao carregar anúncios:', error);
+          const container = document.getElementById('savedAdsList');
+          if (container) {
+              container.innerHTML = '<p>Erro ao carregar anúncios.</p>';
+          }
+      }
+    }
+
+    let currentSlide = 0;
+
+    function showSlide(n) {
+        const slides = document.querySelectorAll('#adPreview .slide');
+        if (!slides.length) return;
+
+        slides.forEach(slide => slide.style.display = 'none');
+        currentSlide = (n + slides.length) % slides.length;
+        slides[currentSlide].style.display = 'block';
+    }
+
+    function nextSlide() {
+        showSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+        showSlide(currentSlide - 1);
+    }
+
+    function toggleProduct(number) {
+        const content = document.getElementById(`product-content-${number}`);
+        const icon = document.getElementById(`toggle-icon-${number}`);
+        content.classList.toggle('expanded');
+        icon.classList.toggle('expanded');
+    }
+
+    // Add these global function declarations
+    window.previewAd = async function(adId) {
+        try {
+            const response = await fetch(`http://localhost:4000/api/ads/${adId}`);
+            if (!response.ok) throw new Error('Falha ao carregar anúncio');
+
+            const data = await response.json();
+            if (data.success) {
+                const modal = new bootstrap.Modal(document.getElementById('previewAdModal'));
+                const previewContent = document.getElementById('previewAdContent');
+                previewContent.innerHTML = '';
+
+                // Handle both single content and array of content
+                const contents = Array.isArray(data.ad.content) ? data.ad.content : [data.ad.content];
+
+                contents.forEach((slide, index) => {
+                    const slideDiv = document.createElement('div');
+                    slideDiv.className = `slide ${index === 0 ? 'active' : ''}`;
+                    slideDiv.style.display = index === 0 ? 'block' : 'none';
+                    slideDiv.innerHTML = slide;
+                    previewContent.appendChild(slideDiv);
+                });
+
+                modal.show();
+                currentModalSlide = 0; // Reset current slide
+
+                // Force layout recalculation
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, 100);
+            }
+        } catch (error) {
+            console.error('Erro ao pré-visualizar anúncio:', error);
+            alert('Erro ao pré-visualizar anúncio: ' + error.message);
+        }
+    };
+
+    // Add separate navigation functions for modal
+    let currentModalSlide = 0;
+
+    window.nextModalSlide = function() {
+        const slides = document.querySelectorAll('#previewAdContent .slide');
+        if (!slides.length) return;
+
+        slides[currentModalSlide].classList.remove('active');
+        setTimeout(() => {
+            slides[currentModalSlide].style.display = 'none';
+            currentModalSlide = (currentModalSlide + 1) % slides.length;
+            slides[currentModalSlide].style.display = 'block';
+            setTimeout(() => {
+                slides[currentModalSlide].classList.add('active');
+            }, 50);
+        }, 500);
+    };
+
+    window.prevModalSlide = function() {
+        const slides = document.querySelectorAll('#previewAdContent .slide');
+        if (!slides.length) return;
+
+        slides[currentModalSlide].classList.remove('active');
+        setTimeout(() => {
+            slides[currentModalSlide].style.display = 'none';
+            currentModalSlide = (currentModalSlide - 1 + slides.length) % slides.length;
+            slides[currentModalSlide].style.display = 'block';
+            setTimeout(() => {
+                slides[currentModalSlide].classList.add('active');
+            }, 50);
+        }, 500);
+    };
+
+    window.useAd = async function(adId) {
+        try {
+            const response = await fetch(`http://localhost:4000/api/ads/${adId}`);
+            if (!response.ok) throw new Error('Falha ao carregar anúncio');
+
+            const data = await response.json();
+            if (data.success && data.ad) {
+                window.ads = Array.isArray(data.ad.content) ? data.ad.content : [data.ad.content];
+                document.getElementById('adTitle').value = data.ad.title;
+                window.updatePreview();
+                window.updateSlidesList();
+            }
+        } catch (error) {
+            console.error('Erro ao carregar anúncio:', error);
+            alert('Erro ao carregar anúncio: ' + error.message);
+        }
+    };
+
+    window.deleteAd = async function(adId) {
+        if (!confirm('Tem certeza que deseja excluir este anúncio?')) return;
+
+        try {
+            const response = await fetch(`http://localhost:4000/api/ads/${adId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) throw new Error('Falha ao excluir anúncio');
+
+            const data = await response.json();
+            if (data.success) {
+                alert('Anúncio excluído com sucesso!');
+                loadSavedAds(); // Reload the ads list
+            }
+        } catch (error) {
+            console.error('Erro ao excluir anúncio:', error);
+            alert('Erro ao excluir anúncio: ' + error.message);
+        }
+    };
+
+    // Update toggleAdType function
+    function toggleAdType(adType) {
+        const twoProductsSection = document.getElementById("twoProductsSection");
+        const productListSection = document.getElementById("productListSection");
+        const videoSection = document.getElementById("videoSection");
+        const slideConfigSection = document.getElementById("slideConfigSection");
+        const backgroundSelect = document.getElementById("backgroundSelect");
+        const options = backgroundSelect.getElementsByTagName('option');
+        
+        // Hide/show slide configuration based on type
+        slideConfigSection.style.display = adType === "video" ? "none" : "block";
+        
+        if (adType === "twoProducts") {
+            twoProductsSection.classList.remove("hidden");
+            productListSection.style.display = "none";
+            videoSection.style.display = "none";
+            // Show only two products backgrounds
+            for (let option of options) {
+                option.style.display = option.value.startsWith('twoProducts') ? '' : 'none';
+            }
+            if (backgroundSelect.value.startsWith('list')) {
+                backgroundSelect.value = 'twoProducts1';
+            }
+        } else if (adType === "productList") {
+            twoProductsSection.classList.add("hidden");
+            productListSection.style.display = "block";
+            videoSection.style.display = "none";
+            loadProductsForSelection();
+            // Show only list backgrounds
+            for (let option of options) {
+                option.style.display = option.value.startsWith('list') ? '' : 'none';
+            }
+            if (backgroundSelect.value.startsWith('twoProducts')) {
+                backgroundSelect.value = 'list1';
+            }
+        } else if (adType === "video") {
+            twoProductsSection.classList.add("hidden");
+            productListSection.style.display = "none";
+            videoSection.style.display = "block";
+        }
+        
+        // Only call updatePreview if it exists
+        if (typeof updatePreview === 'function') {
+            updatePreview();
+        }
+
+        // Update active button
+        const buttons = document.querySelectorAll('.ad-type-button');
+        buttons.forEach(button => {
+            button.classList.remove('active');
+        });
+        document.querySelector(`.ad-type-button[onclick="toggleAdType('${adType}')"]`).classList.add('active');
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize ads array
+        window.ads = [];
+        
+        loadExistingProducts();
+        toggleProduct(1);
+        toggleAdType('twoProducts');
+    });
+
+    async function loadProductsForSelection() {
+        try {
+            const response = await fetch('http://localhost:4000/api/products');
+            const data = await response.json();
+            
+            if (data.success) {
+                const container = document.getElementById('productCheckboxes');
+                container.innerHTML = data.products.map(product => `
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                               value="${product.id}" id="product${product.id}">
+                        <label class="form-check-label" for="product${product.id}">
+                            ${product.name} - R$ ${product.price}
+                        </label>
+                    </div>
+                `).join('');
+            }
+        } catch (error) {
+            console.error('Erro ao carregar produtos:', error);
+        }
+    }
+
+    // Modificar a função generateListAdHTML para usar apenas produtos selecionados
+    async function generateListAdHTML(backgroundClass) {
+        try {
+            const selectedProducts = [];
+            const checkboxes = document.querySelectorAll('#productCheckboxes input:checked');
+            
+            for (const checkbox of checkboxes) {
+                const response = await fetch(`http://localhost:4000/api/products/${checkbox.value}`);
+                const data = await response.json();
+                if (data.success) {
+                    selectedProducts.push(data.product);
+                }
+            }
+
+            if (selectedProducts.length === 0) {
+                alert('Selecione pelo menos um produto para a lista');
+                return null;
+            }
+
+            const backgroundImage = getBackgroundImage(backgroundClass);
+            console.log('Produtos selecionados:', selectedProducts);
+
+            return `
+            <div class="ad-container" style="background-image: url('${backgroundImage}')">
+                <div class="list-layout">
+                    <div class="product-image-container">
+                        <img class="product-image" 
+                             src="${selectedProducts[0].imageUrl}" 
+                             alt="${selectedProducts[0].name}"
+                             style="display: block;">
+                    </div>
+                    <div class="products-list-container">
+                        ${selectedProducts.map(product => `
+                            <div class="product-list-item" 
+                                 data-image-url="${product.imageUrl}"
+                                 data-name="${product.name}"
+                                 data-price="${product.price}">
+                                <span class="product-list-name">${product.name}</span>
+                                <span class="product-list-price">R$ ${Number(product.price).toFixed(2)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>`;
+        } catch (error) {
+            console.error('Erro ao gerar anúncio em lista:', error);
+            return null;
+        }
+    }
+
+    // Add new save function
+    async function saveAdWithTitle() {
+        const title = document.getElementById('adTitleModal').value;
+        if (!title) {
+            alert('Por favor, digite um título para o anúncio');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:4000/api/ads', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title,
+                    content: window.ads
+                })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                alert('Anúncio salvo com sucesso!');
+                loadSavedAds();
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('saveAdModal')).hide();
+                // Clear form
+                document.getElementById('adTitleModal').value = '';
+            } else {
+                throw new Error(data.message || 'Erro ao salvar anúncio');
+            }
+        } catch (error) {
+            console.error('Erro ao salvar anúncio:', error);
+            alert('Erro ao salvar anúncio: ' + error.message);
+        }
+    }
+
+    function closeAndClearModal() {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('saveAdModal'));
+        if (modal) {
+            modal.hide();
+            setTimeout(() => {
+                document.getElementById('adTitleModal').value = '';
+                document.body.classList.remove('modal-open');
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }, 200);
+        }
+    }
+
+    function handleSaveAndClose() {
+        handleSaveAd().then(() => {
+            closeAndClearModal();
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const saveAdModal = document.getElementById('saveAdModal');
+        if (saveAdModal) {
+            saveAdModal.addEventListener('hidden.bs.modal', function() {
+                setTimeout(() => {
+                    document.getElementById('adTitleModal').value = '';
+                    document.body.classList.remove('modal-open');
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                }, 200);
+            });
+        }
+    });
+
+    async function uploadVideo(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('video', file);
+
+      try {
+        const response = await fetch('http://localhost:4000/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          alert('Vídeo carregado com sucesso!');
+        } else {
+          throw new Error(data.message || 'Erro ao carregar vídeo');
+        }
+      } catch (error) {
+        console.error('Erro no upload:', error);
+        alert('Erro no upload: ' + error.message);
+      }
+    }
+
+    async function handleVideoUpload(file) {
+        if (!file) return;
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+            const response = await fetch('http://localhost:4000/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erro no upload do vídeo');
+            }
+            
+            const data = await response.json();
+            if (data.success) {
+                const videoHtml = generateVideoAdHTML(data.fileUrl);
+                window.ads.push(videoHtml);
+                updatePreview();
+                updateSlidesList();
+                alert('Vídeo adicionado com sucesso!');
+            } else {
+                throw new Error(data.message || 'Erro ao processar vídeo');
+            }
+        } catch (error) {
+            console.error('Erro no upload:', error);
+            alert('Erro no upload: ' + error.message);
+        }
+    }
+
+    function generateVideoAdHTML(videoUrl) {
+        const fullVideoUrl = videoUrl.startsWith('http') ? 
+            videoUrl : 
+            `http://localhost:4000${videoUrl}`;
+        
+        return `
+        <div class="video-container">
+            <video 
+                src="${fullVideoUrl}" 
+                autoplay 
+                muted 
+                loop
+                playsinline 
+                style="width: 100%; height: 100%; object-fit: contain;">
+            </video>
+        </div>`;
+    }
+  </script>
+
+  <style>
+    .slide {
+        display: none;
+    }
+    .slide.active {
+        display: block;
+    }
+    .slide-nav {
+        text-align: center;
+        margin-top: 20px;
+    }
+    .slide-nav button {
+        margin: 0 10px;
+        padding: 8px 16px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .slide-nav button:hover {
+        background: #0056b3;
+    }
+    .product-selection {
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .form-check {
+        margin-bottom: 8px;
+    }
+  </style>
+</body>
+</html>

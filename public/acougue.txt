@@ -1,0 +1,82 @@
+[
+  {
+    "produto": {
+      "nome": "Picanha Bovina Premium",
+      "descricao": "Corte nobre e macio, ideal para churrascos. Peso médio de 1kg.",
+      "preco": 89.90,
+      "foto": "https://superprix.vteximg.com.br/arquivos/ids/167888-600-600/Picanha-Bovina-Friboi-Maturatta-14kg.jpg"
+    }
+  },
+  {
+    "produto": {
+      "nome": "Filé Mignon Bovino",
+      "descricao": "Carne extremamente macia e suculenta, perfeita para grelhados e medalhões.",
+      "preco": 129.90,
+      "foto": "https://ojhon.com.br/wp-content/uploads/2021/11/Design-sem-nome-11-700x700.png"
+    }
+  },
+  {
+    "produto": {
+      "nome": "Costela Bovina",
+      "descricao": "Ideal para assados e churrascos, garantindo sabor e suculência.",
+      "preco": 39.90,
+      "foto": "https://png.pngtree.com/png-vector/20240208/ourmid/pngtree-ribs-roasts-beef-cuts-png-image_11713492.png"
+    }
+  },
+  {
+    "produto": {
+      "nome": "Coxa e Sobrecoxa de Frango",
+      "descricao": "Cortes versáteis para assados, grelhados e ensopados.",
+      "preco": 12.90,
+      "foto": "https://www.lar.ind.br/wp-content/uploads/2021/02/coxas-e-sobrecoxas-1024x819.png"
+    }
+  },
+  {
+    "produto": {
+      "nome": "Alcatra Bovina",
+      "descricao": "Carne macia e saborosa, excelente para grelhados e bifes.",
+      "preco": 49.90,
+      "foto": "https://himalaia.agilecdn.com.br/12611.jpg"
+    }
+  },
+  {
+    "produto": {
+      "nome": "Fraldinha",
+      "descricao": "Muito saborosa e suculenta, ótima para churrascos e assados.",
+      "preco": 44.90,
+      "foto": "https://tdc01z.vteximg.com.br/arquivos/ids/159371-1000-1000/16997-carne-bovina-2-fraldinha-grill-kg-peca.png"
+    }
+  },
+  {
+    "produto": {
+      "nome": "Linguiça Toscana",
+      "descricao": "Linguiça suína temperada, ideal para churrascos e grelhados.",
+      "preco": 19.90,
+      "foto": "https://www.auroraalimentos.com.br/wp-content/uploads/2022/04/LINGUICA-TOSCANA-CONGELADA-AURORA-5-KG-401.png"
+    }
+  },
+  {
+    "produto": {
+      "nome": "Peito de Frango",
+      "descricao": "Carne magra e versátil, perfeita para grelhados e receitas fitness.",
+      "preco": 14.90,
+      "foto": "https://s3-sa-east-1.amazonaws.com/superimg/img.produtos/7893000005945/img_1200_1.png"
+    }
+  },
+  {
+    "produto": {
+      "nome": "Carne Moída de Patinho",
+      "descricao": "Opção magra e saborosa para hambúrgueres, bolinhos e molhos.",
+      "preco": 32.90,
+      "foto": "https://s3-sa-east-1.amazonaws.com/superimg/img.produtos/7896103805986/img_1200_1.png"
+    }
+  },
+  {
+    "produto": {
+      "nome": "Pernil Suíno",
+      "descricao": "Corte suculento e saboroso, ótimo para assados e cozidos.",
+      "preco": 24.90,
+      "foto": "https://www.prcomercio.com.br/upload/service/BLWiWAxHmX0JSJyPVaH4NXRenguVZS4sV4JeQSRg.png"
+    }
+  }
+]

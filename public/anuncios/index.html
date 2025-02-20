@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gerador de Anúncios</title>
+  <link href="/anuncios/style.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Adicionar SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css" rel="stylesheet">
+  <script defer>
+    function filterProducts(productNumber) {
+        const searchInput = document.getElementById(`product${productNumber}Search`).value.toLowerCase();
+        const selectElement = document.getElementById(`product${productNumber}Select`);
+        const options = selectElement.options;
+        
+        for (let i = 0; i < options.length; i++) {
+            const text = options[i].text.toLowerCase();
+            options[i].style.display = text.includes(searchInput) ? '' : 'none';
+        }
+    }
+  </script>
+  <script src="/anuncios/script.js" defer></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <style>
+    :root {
+        --primary-color: #662d91;
+        --primary-light: #8347af;
+        --primary-dark: #4a1d6e;
+        --secondary-color: #8347af;
+        --success-color: #28a745;
+        --danger-color: #dc3545;
+        --dark-bg: #1a1a1a;
+        --light-bg: #f8f9fa;
+        --border-radius: 8px;
+        --spacing-sm: 0.5rem;
+        --spacing-md: 1rem;
+        --spacing-lg: 1.5rem;
+    }
+
+    body {
+        overflow-x: hidden;
+        background-color: var(--light-bg);
+    }
+
+    /* Layout Responsivo */
+    .split-layout {
+        display: flex;
+        flex-direction: row;
+        height: calc(100vh - 56px);
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+    }
+
+    @media (max-width: 992px) {
+        .split-layout {
+            flex-direction: column;
+            height: auto;
+        }
+
+        .left-panel, .right-panel {
+            width: 100%;
+            max-height: none;
+        }
+    }
+
+    /* Painéis */
+    .left-panel, .right-panel {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 8px rgba(102, 45, 145, 0.1);
+        padding: var(--spacing-lg);
+        overflow-y: auto;
+    }
+
+    .left-panel {
+        flex: 0 0 40%;
+    }
+
+    .right-panel {
+        flex: 0 0 60%;
+    }
+
+    /* Seções de Formulário */
+    .form-section {
+        background: var(--light-bg);
+        border-radius: var(--border-radius);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+        border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .form-section h4 {
+        color: var(--primary-color);
+        margin-bottom: var(--spacing-md);
+        font-size: 1.2rem;
+    }
+
+    /* Botões e Controles */
+    .btn-group {
+        display: flex;
+        gap: var(--spacing-md);
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius);
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+    }
+
+    /* Timeline responsiva */
+    .timeline-container {
+        height: auto;
+        min-height: 120px;
+    }
+
+    .timeline-content {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+
+    /* Preview do anúncio responsivo */
+    .preview-container {
+        position: relative;
+        width: 100%;
+        padding-top: 56.25%; /* 16:9 Aspect Ratio */
+        margin-bottom: var(--spacing-lg);
+        border: 2px solid var(--primary-transparent);
+        border-radius: var(--border-radius);
+    }
+
+    .ad-preview {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transform: none;
+        margin: 0;
+    }
+
+    /* Melhorias visuais */
+    .product-section {
+        border-left: 4px solid var(--primary-color);
+        padding-left: var(--spacing-md);
+    }
+
+    .saved-ad-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: white;
+        border-radius: var(--border-radius);
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .saved-ad-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .saved-ad-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .saved-ad-buttons {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-sm);
+    }
+
+    .saved-ad-buttons .btn {
+        flex: 1;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .saved-ad-thumbnail {
+        width: 100%;
+        height: 150px;
+        background-size: cover;
+        background-position: center;
+        border-radius: var(--border-radius);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    /* Animações suaves */
+    .fade-in {
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Ajustes para telas pequenas */
+    @media (max-width: 576px) {
+        .btn-group {
+            flex-direction: column;
+        }
+
+        .saved-ad-buttons {
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .timeline-container {
+            height: 100px;
+        }
+    }
+
+    /* Melhorias de acessibilidade */
+    :focus {
+        outline: 3px solid var(--primary-color);
+        outline-offset: 2px;
+    }
+
+    /* Scrollbar personalizada */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--secondary-color);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-color);
+    }
+
+    /* Update navbar style */
+    .navbar {
+        background-color: var(--primary-color) !important;
+    }
+
+    /* Update buttons */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-light);
+        border-color: var (--primary-light);
+    }
+
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-outline-primary:hover, 
+    .btn-outline-primary.active {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+
+    /* Update ad type buttons */
+    .ad-type-button {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .ad-type-button.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    /* Update headings */
+    h1, h2, h3, h4, h5, h6 {
+        color: var(--primary-color);
+    }
+
+    /* Update form inputs */
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(102, 45, 145, 0.25);
+    }
+
+    /* Update modals */
+    .modal-header {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    /* Update panels */
+    .left-panel, .right-panel {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 8px rgba(102, 45, 145, 0.1);
+    }
+
+    /* Update preview container */
+    .preview-container {
+        border: 2px solid var(--primary-transparent);
+        border-radius: var(--border-radius);
+    }
+
+    /* Update timeline */
+    .timeline-slide.active {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(102, 45, 145, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <!-- BARRA DE NAVEGAÇÃO BOOTSTRAP -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-display"></i> Projeto Telao
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">
+                        <i class="bi bi-house"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/anuncios">
+                        <i class="bi bi-image"></i> Anúncios
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-box"></i> Produtos
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="/produtos/adicionarProd">
+                                <i class="bi bi-plus-circle"></i> Adicionar Produto
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/produtos/product-list">
+                                <i class="bi bi-list"></i> Lista de Produtos
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+  </nav>
+
+  <div class="split-layout">
+    <div class="left-panel">
+        <h2 class="mb-4">Configuração do Anúncio</h2>
+        
+        <div class="form-section">
+            <h4>Tipo de Anúncio</h4>
+            <div class="ad-type-buttons">
+                <button class="btn btn-outline-primary ad-type-button active" data-ad-type="twoProducts" onclick="toggleAdType('twoProducts')">
+                    <i class="bi bi-box-seam"></i> 2 Produtos
+                </button>
+                <button class="btn btn-outline-primary ad-type-button" data-ad-type="productList" onclick="toggleAdType('productList')">
+                    <i class="bi bi-list-ul"></i> Lista de Produtos
+                </button>
+                <button class="btn btn-outline-primary ad-type-button" data-ad-type="video" onclick="toggleAdType('video')">
+                    <i class="bi bi-camera-video"></i> Vídeo
+                </button>
+            </div>
+        </div>
+
+        <div id="twoProductsSection">
+            <div class="form-section">
+                <div class="product-section" data-product-number="1">
+                    <div class="product-header" onclick="toggleProduct(1)">
+                        <h4>Produto 1</h4>
+                        <i class="bi bi-chevron-down toggle-icon" id="toggle-icon-1"></i>
+                    </div>
+                    <div class="product-content" id="product-content-1">
+                        <label for="product1Search" class="control-label">Pesquisar Produto 1</label>
+                        <input type="text" id="product1Search" class="form-control" oninput="filterProducts(1)">
+                        <label for="product1Select" class="form-label mt-2">Selecione o Produto 1</label>
+                        <select id="product1Select" class="form-select" onchange="selectExistingProduct(this.value, 1)">
+                          <option value="">Selecione um produto</option>
+                        </select>
+                        <label for="product1Title" class="form-label mt-2">Título do Produto 1</label>
+                        <input type="text" id="product1Title" class="form-control">
+                        <label for="product1Description" class="form-label mt-2">Descrição do Produto 1</label>
+                        <textarea id="product1Description" class="form-control" rows="2"></textarea>
+                        <label for="product1Price" class="form-label mt-2">Preço do Produto 1</label>
+                        <input type="text" id="product1Price" class="form-control">
+                        <label for="product1Image" class="form-label mt-2">Imagem do Produto 1</label>
+                        <input type="file" id="product1Image" class="form-control" data-imageUrl="">
+                    </div>
+                </div>
+
+                <div class="product-section" data-product-number="2">
+                    <div class="product-header" onclick="toggleProduct(2)">
+                        <h4>Produto 2</h4>
+                        <i class="bi bi-chevron-down toggle-icon" id="toggle-icon-2"></i>
+                    </div>
+                    <div class="product-content" id="product-content-2">
+                        <label for="product2Search" class="control-label">Pesquisar Produto 2</label>
+                        <input type="text" id="product2Search" class="form-control" oninput="filterProducts(2)">
+                        <label for="product2Select" class="form-label mt-2">Selecione o Produto 2</label>
+                        <select id="product2Select" class="form-select" onchange="selectExistingProduct(this.value, 2)">
+                          <option value="">Selecione um produto</option>
+                        </select>
+                        <label for="product2Title" class="form-label mt-2">Título do Produto 2</label>
+                        <input type="text" id="product2Title" class="form-control">
+                        <label for="product2Description" class="form-label mt-2">Descrição do Produto 2</label>
+                        <textarea id="product2Description" class="form-control" rows="2"></textarea>
+                        <label for="product2Price" class="form-label mt-2">Preço do Produto 2</label>
+                        <input type="text" id="product2Price" class="form-control">
+                        <label for="product2Image" class="form-label mt-2">Imagem do Produto 2</label>
+                        <input type="file" id="product2Image" class="form-control" data-imageUrl="">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Atualizar a seção de lista de produtos -->
+        <div id="productListSection" class="form-section" style="display: none;">
+            <h4>Selecionar Produtos para Lista</h4>
+            <div class="mb-3">
+                <div class="product-search-container mb-3">
+                    <input type="text" 
+                           class="form-control" 
+                           id="productSearchInput" 
+                           placeholder="Pesquisar produtos por nome ou preço...">
+                    <span class="search-icon">
+                        <i class="bi bi-search"></i>
+                    </span>
+                </div>
+                <div id="productCheckboxes" class="product-selection">
+                    <div class="alert alert-info">Carregando produtos...</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="videoSection" class="form-section" style="display: none;">
+            <h4>Adicionar Vídeo</h4>
+            <div class="mb-3">
+                <label for="videoUrl" class="form-label">URL do Vídeo (YouTube, Vimeo, ou MP4 direto)</label>
+                <input type="text" id="videoUrl" class="form-control" placeholder="Cole a URL do vídeo aqui">
+                <small class="form-text text-muted">Suporta links do YouTube, Vimeo ou URLs diretas de arquivos MP4</small>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h4>Configurações do Slide</h4>
+            <div class="mb-3">
+                <label for="backgroundSelect" class="control-label">Escolha o fundo:</label>
+                <select id="backgroundSelect" class="form-select">
+                    <optgroup label="Fundos para 2 Produtos">
+                        <option value="twoProducts1">Fundo Duo 1</option>
+                        <option value="twoProducts2">Fundo Duo 2</option>
+                        <option value="twoProducts3">Fundo Duo 3</option>
+                    </optgroup>
+                    <optgroup label="Fundos para Lista">
+                        <option value="list1">Fundo Lista 1</option>
+                        <option value="list2">Fundo Lista 2</option>
+                        <option value="list3">Fundo Lista 3</option>
+                    </optgroup>
+                </select>
+                <i class="bi bi-info-circle" data-bs-toggle="modal" data-bs-target="#backgroundModal" style="cursor: pointer;"></i>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button id="addAd" class="btn btn-success">
+                <i class="bi bi-plus-lg"></i> Adicionar Anúncio
+            </button>
+            <button id="saveAd" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#saveAdModal">
+                <i class="bi bi-save"></i> Salvar Anúncio
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Atualizar a seção do painel direito -->
+    <div class="right-panel">
+        <h2 class="mb-4">Pré-visualização & Anúncios Salvos</h2>
+        
+        <!-- Container de preview -->
+        <div class="preview-container mb-4">
+            <div id="adPreview" class="ad-preview">
+                <!-- Os slides serão inseridos aqui via JavaScript -->
+            </div>
+        </div>
+
+        <!-- Timeline de slides -->
+        <div class="timeline-container mb-4">
+            <div class="timeline-content" id="timelineSlides">
+                <!-- Os slides da timeline serão inseridos aqui -->
+            </div>
+        </div>
+
+        <!-- Separador -->
+        <hr class="my-4">
+
+        <!-- Seção de anúncios salvos -->
+        <h3 class="mb-3">Anúncios Salvos</h3>
+        <div id="savedAdsList" class="saved-ads-grid">
+            <!-- Os anúncios salvos serão inseridos aqui -->
+        </div>
+    </div>
+</div>
+
+  <!-- Modal para pré-visualização de anúncios -->
+  <div class="modal fade" id="previewAdModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl"> <!-- Change to modal-xl for wider modal -->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="previewAdModalLabel">Pré-visualização do Anúncio</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="previewAdContent"></div>
+          <div class="slide-nav">
+            <button onclick="prevModalSlide()" class="btn-lg">
+                <i class="bi bi-chevron-left"></i> Anterior
+            </button>
+            <button onclick="nextModalSlide()" class="btn-lg">
+                Próximo <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for displaying backgrounds -->
+  <div class="modal fade" id="backgroundModal" tabindex="-1" aria-labelledby="backgroundModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="backgroundModalLabel">Fundos Disponíveis</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <img src="https://master-teste.vercel.app/fundos/duo1.jpg" alt="Fundo 1 (Dois Produtos)" class="img-fluid">
+                        <p>Fundo 1 (Dois Produtos)</p>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="https://master-teste.vercel.app/fundos/duo2.jpg" alt="Fundo 2 (Dois Produtos)" class="img-fluid">
+                        <p>Fundo 2 (Dois Produtos)</p>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="https://master-teste.vercel.app/fundos/duo3.jpg" alt="Fundo 3 (Dois Produtos)" class="img-fluid">
+                        <p>Fundo 3 (Dois Produtos)</p>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="https://master-teste.vercel.app/fundos/list1.jpg" alt="Fundo 1 (Lista)" class="img-fluid">
+                        <p>Fundo 1 (Lista)</p>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="https://master-teste.vercel.app/fundos/list2.jpg" alt="Fundo 2 (Lista)" class="img-fluid">
+                        <p>Fundo 2 (Lista)</p>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="https://master-teste.vercel.app/fundos/list3.jpg" alt="Fundo 3 (Lista)" class="img-fluid">
+                        <p>Fundo 3 (Lista)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Add Save Modal -->
+  <div class="modal fade" id="saveAdModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="saveAdModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="saveAdModalLabel">Salvar Anúncio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="adTitleModal" class="form-label">Título do Anúncio:</label>
+                    <input type="text" id="adTitleModal" class="form-control" 
+                           placeholder="Digite um título para identificar este anúncio">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeAndClearModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="handleSaveAndClose()">Salvar</button>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" 
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" 
+        crossorigin="anonymous"></script>
+  <script>
+    // Remove the MASTER_URL declaration from here since it's already in script.js
+    
+    async function loadExistingProducts() {
+        try {
+            const response = await fetch(`${MASTER_URL}/api/products`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                const product1Select = document.getElementById('product1Select');
+                const product2Select = document.getElementById('product2Select');
+
+                if (!product1Select || !product2Select) {
+                    console.error('Elementos de seleção de produtos não encontrados');
+                    return;
+                }
+
+                const options = data.products.map(product => 
+                    `<option value="${product.id}">${product.name}</option>`
+                ).join('');
+
+                const defaultOption = '<option value="">Selecione um produto</option>';
+                product1Select.innerHTML = defaultOption + options;
+                product2Select.innerHTML = defaultOption + options;
+            }
+        } catch (error) {
+            console.error('Erro ao carregar produtos:', error);
+        }
+    }
+
+    // Update the background images in modal
+    document.getElementById('backgroundModal').querySelector('.modal-body').innerHTML = `
+        <div class="row">
+            <div class="col-md-4">
+                <img src="${MASTER_URL}/fundos/duo1.jpg" alt="Fundo 1 (Dois Produtos)" class="img-fluid">
+                <p>Fundo 1 (Dois Produtos)</p>
+            </div>
+            <div class="col-md-4">
+                <img src="${MASTER_URL}/fundos/duo2.jpg" alt="Fundo 2 (Dois Produtos)" class="img-fluid">
+                <p>Fundo 2 (Dois Produtos)</p>
+            </div>
+            <div class="col-md-4">
+                <img src="${MASTER_URL}/fundos/duo3.jpg" alt="Fundo 3 (Dois Produtos)" class="img-fluid">
+                <p>Fundo 3 (Dois Produtos)</p>
+            </div>
+            <div class="col-md-4">
+                <img src="${MASTER_URL}/fundos/list1.jpg" alt="Fundo 1 (Lista)" class="img-fluid">
+                <p>Fundo 1 (Lista)</p>
+            </div>
+            <div class="col-md-4">
+                <img src="${MASTER_URL}/fundos/list2.jpg" alt="Fundo 2 (Lista)" class="img-fluid">
+                <p>Fundo 2 (Lista)</p>
+            </div>
+            <div class="col-md-4">
+                <img src="${MASTER_URL}/fundos/list3.jpg" alt="Fundo 3 (Lista)" class="img-fluid">
+                <p>Fundo 3 (Lista)</p>
+            </div>
+        </div>
+    `;
+
+    // Update all fetch calls to use MASTER_URL
+    async function selectExistingProduct(productId, productNumber) {
+        try {
+            console.log(`Fetching product with ID: ${productId}`); // Debug log
+            const response = await fetch(`${MASTER_URL}/api/products/${productId}`);
+            if (!response.ok) {
+                throw new Error('Falha ao carregar produto');
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                const product = data.product;
+                document.getElementById(`product${productNumber}Title`).value = product.name;
+                document.getElementById(`product${productNumber}Description`).value = product.description;
+                document.getElementById(`product${productNumber}Price`).value = product.price;
+                document.getElementById(`product${productNumber}Image`).dataset.imageUrl = product.imageUrl;
+
+                // Mostrar a imagem do produto
+                const imageContainer = document.getElementById(`product${productNumber}Image`).parentNode;
+                const existingImage = imageContainer.querySelector('img');
+                if (existingImage) {
+                    existingImage.src = product.imageUrl;
+                } else {
+                    const imagePreview = document.createElement('img');
+                    imagePreview.src = product.imageUrl;
+                    imagePreview.style.maxWidth = '100%';
+                    imageContainer.appendChild(imagePreview);
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao selecionar produto:', error);
+        }
+    }
+
+    function filterProducts(productNumber) {
+        const searchInput = document.getElementById(`product${productNumber}Search`).value.toLowerCase();
+        const selectElement = document.getElementById(`product${productNumber}Select`);
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+
+        selectElement.innerHTML = products
+            .filter(product => product.name.toLowerCase().includes(searchInput))
+            .map((product, index) => `<option value="${index}">${product.name}</option>`)
+            .join('');
+    }
+
+    async function loadSavedAds() {
+        try {
+            const response = await fetch(`${MASTER_URL}/api/ads`);
+            if (!response.ok) throw new Error('Falha ao carregar anúncios');
+
+            const data = await response.json();
+            if (data.success) {
+                const container = document.getElementById('savedAdsList');
+                container.innerHTML = data.ads.map(ad => `
+                    <div class="saved-ad-card">
+                        <div class="saved-ad-thumbnail" style="background-image: url('${ad.imageUrl || `${MASTER_URL}/files/default-ad`}'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+                        <h5 class="saved-ad-title">${ad.title}</h5>
+                        <div class="saved-ad-buttons">
+                            <button class="btn btn-sm btn-primary" onclick="previewAd('${ad.id}')">
+                                <i class="bi bi-eye"></i> Visualizar
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteAd('${ad.id}')">
+                                <i class="bi bi-trash"></i> Excluir
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        } catch (error) {
+            console.error('Erro ao carregar anúncios:', error);
+            const container = document.getElementById('savedAdsList');
+            container.innerHTML = '<div class="alert alert-danger">Erro ao carregar anúncios</div>';
+        }
+    }
+
+    let currentSlide = 0;
+
+    function showSlide(n) {
+        const slides = document.querySelectorAll('#adPreview .slide');
+        if (!slides.length) return;
+
+        slides.forEach(slide => slide.style.display = 'none');
+        currentSlide = (n + slides.length) % slides.length;
+        slides[currentSlide].style.display = 'block';
+
+        // Update active state in timeline
+        const timelineSlides = document.querySelectorAll('.timeline-slide');
+        timelineSlides.forEach((slide, index) => {
+            slide.classList.toggle('active', index === currentSlide);
+        });
+    }
+
+    function nextSlide() {
+        showSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+        showSlide(currentSlide - 1);
+    }
+
+    function toggleProduct(number) {
+        const content = document.getElementById(`product-content-${number}`);
+        const icon = document.getElementById(`toggle-icon-${number}`);
+        content.classList.toggle('expanded');
+        icon.classList.toggle('expanded');
+    }
+
+    // Add these global function declarations
+    window.previewAd = async function(adId) {
+        try {
+            const response = await fetch(`${MASTER_URL}/api/ads/${adId}`);
+            if (!response.ok) throw new Error('Falha ao carregar anúncio');
+
+            const data = await response.json();
+            if (data.success) {
+                const modal = new bootstrap.Modal(document.getElementById('previewAdModal'));
+                const previewContent = document.getElementById('previewAdContent');
+                previewContent.innerHTML = '';
+
+                // Handle both single content and array of content
+                const contents = Array.isArray(data.ad.content) ? data.ad.content : [data.ad.content];
+
+                contents.forEach((slide, index) => {
+                    const slideDiv = document.createElement('div');
+                    slideDiv.className = `slide ${index === 0 ? 'active' : ''}`;
+                    slideDiv.style.display = index === 0 ? 'block' : 'none';
+                    slideDiv.innerHTML = slide;
+                    previewContent.appendChild(slideDiv);
+                });
+
+                if (contents.length > 1) {
+                    const nav = document.createElement('div');
+                    nav.className = 'slide-nav';
+                    nav.innerHTML = `
+                        <button onclick="prevModalSlide()" class="btn-lg">
+                            <i class="bi bi-chevron-left"></i> Anterior
+                        </button>
+                        <button onclick="nextModalSlide()" class="btn-lg">
+                            Próximo <i class="bi bi-chevron-right"></i>
+                        </button>
+                    `;
+                    previewContent.appendChild(nav);
+                }
+
+                modal.show();
+                currentModalSlide = 0; // Reset current slide
+
+                // Force layout recalculation
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, 100);
+            }
+        } catch (error) {
+            console.error('Erro ao pré-visualizar anúncio:', error);
+            alert('Erro ao pré-visualizar anúncio: ' + error.message);
+        }
+    };
+
+    // Add separate navigation functions for modal
+    let currentModalSlide = 0;
+
+    window.nextModalSlide = function() {
+        const slides = document.querySelectorAll('#previewAdContent .slide');
+        if (!slides.length) return;
+
+        slides[currentModalSlide].classList.remove('active');
+        setTimeout(() => {
+            slides[currentModalSlide].style.display = 'none';
+            currentModalSlide = (currentModalSlide + 1) % slides.length;
+            slides[currentModalSlide].style.display = 'block';
+            setTimeout(() => {
+                slides[currentModalSlide].classList.add('active');
+            }, 50);
+        }, 500);
+    };
+
+    window.prevModalSlide = function() {
+        const slides = document.querySelectorAll('#previewAdContent .slide');
+        if (!slides.length) return;
+
+        slides[currentModalSlide].classList.remove('active');
+        setTimeout(() => {
+            slides[currentModalSlide].style.display = 'none';
+            currentModalSlide = (currentModalSlide - 1 + slides.length) % slides.length;
+            slides[currentModalSlide].style.display = 'block';
+            setTimeout(() => {
+                slides[currentModalSlide].classList.add('active');
+            }, 50);
+        }, 500);
+    };
+
+    window.useAd = async function(adId) {
+        try {
+            const response = await fetch(`${MASTER_URL}/api/ads/${adId}`);
+            if (!response.ok) throw new Error('Falha ao carregar anúncio');
+
+            const data = await response.json();
+            if (data.success && data.ad) {
+                window.ads = Array.isArray(data.ad.content) ? data.ad.content : [data.ad.content];
+                document.getElementById('adTitle').value = data.ad.title;
+                window.updatePreview();
+                window.updateSlidesList();
+            }
+        } catch (error) {
+            console.error('Erro ao carregar anúncio:', error);
+            alert('Erro ao carregar anúncio: ' + error.message);
+        }
+    };
+
+    window.deleteAd = async function(adId) {
+        if (!confirm('Tem certeza que deseja excluir este anúncio?')) return;
+
+        try {
+            const response = await fetch(`${MASTER_URL}/api/ads/${adId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) throw new Error('Falha ao excluir anúncio');
+
+            const data = await response.json();
+            if (data.success) {
+                alert('Anúncio excluído com sucesso!');
+                loadSavedAds(); // Reload the ads list
+            }
+        } catch (error) {
+            console.error('Erro ao excluir anúncio:', error);
+            alert('Erro ao excluir anúncio: ' + error.message);
+        }
+    };
+
+    function toggleAdType(adType) {
+        const twoProductsSection = document.getElementById("twoProductsSection");
+        const productListSection = document.getElementById("productListSection");
+        const videoSection = document.getElementById("videoSection");
+        const backgroundSelect = document.getElementById("backgroundSelect");
+        
+        // Update active button state
+        document.querySelectorAll('.ad-type-button').forEach(button => {
+            if (button.getAttribute('data-ad-type') === adType) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+        });
+
+        // Show/hide sections based on type
+        if (adType === "twoProducts") {
+            twoProductsSection.classList.remove("hidden");
+            productListSection.style.display = "none";
+            videoSection.style.display = "none";
+            backgroundSelect.closest('.form-section').style.display = "block";
+            Array.from(backgroundSelect.options).forEach(option => {
+                option.style.display = option.value.startsWith('twoProducts') ? '' : 'none';
+            });
+            if (backgroundSelect.value.startsWith('list')) {
+                backgroundSelect.value = 'twoProducts1';
+            }
+        } else if (adType === "productList") {
+            twoProductsSection.classList.add("hidden");
+            productListSection.style.display = "block";
+            videoSection.style.display = "none";
+            backgroundSelect.closest('.form-section').style.display = "block";
+            loadProductsForSelection();
+            Array.from(backgroundSelect.options).forEach(option => {
+                option.style.display = option.value.startsWith('list') ? '' : 'none';
+            });
+            if (backgroundSelect.value.startsWith('twoProducts')) {
+                backgroundSelect.value = 'list1';
+            }
+        } else if (adType === "video") {
+            twoProductsSection.classList.add("hidden");
+            productListSection.style.display = "none";
+            videoSection.style.display = "block";
+            backgroundSelect.closest('.form-section').style.display = "none";
+        }
+    }
+
+    async function handleSaveAndClose() {
+        const title = document.getElementById('adTitleModal').value;
+        if (!title) {
+            alert('Por favor, digite um título para o anúncio');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${MASTER_URL}/api/ads`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: title,
+                    content: window.ads
+                })
+            });
+
+            if (!response.ok) throw new Error('Falha ao salvar anúncio');
+
+            const data = await response.json();
+            if (data.success) {
+                alert('Anúncio salvo com sucesso!');
+                loadSavedAds();
+                closeAndClearModal();
+            }
+        } catch (error) {
+            console.error('Erro ao salvar anúncio:', error);
+            alert('Erro ao salvar anúncio: ' + error.message);
+        }
+    }
+
+    function closeAndClearModal() {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('saveAdModal'));
+        if (modal) {
+            modal.hide();
+            setTimeout(() => {
+                document.getElementById('adTitleModal').value = '';
+                document.body.classList.remove('modal-open');
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }, 200);
+        }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadExistingProducts();
+        toggleProduct(1);
+        toggleAdType('twoProducts'); // Start with two products view
+        loadSavedAds(); // Load saved ads
+    });
+
+    // Replace updateSlidesList function with updateTimeline
+    window.updateSlidesList = function() {
+        const timelineContainer = document.getElementById('timelineSlides');
+        if (!timelineContainer) return;
+        
+        timelineContainer.innerHTML = window.ads.map((adHTML, index) => {
+            const thumbnailDiv = document.createElement('div');
+            thumbnailDiv.className = `timeline-slide ${index === currentSlide ? 'active' : ''}`;
+            thumbnailDiv.onclick = () => showSlide(index);
+            
+            // Create a temporary container to extract the background image
+            const temp = document.createElement('div');
+            temp.innerHTML = adHTML;
+            const adContainer = temp.querySelector('.ad-container');
+            const bgImage = adContainer ? 
+                adContainer.style.backgroundImage : 
+                'linear-gradient(45deg, #2a2a2a 25%, #3a3a3a 25%, #3a3a3a 50%, #2a2a2a 50%, #2a2a2a 75%, #3a3a3a 75%, #3a3a3a 100%)';
+            
+            thumbnailDiv.innerHTML = `
+                <div class="thumbnail" style="background: ${bgImage}; background-size: cover;"></div>
+                <button class="remove-btn" onclick="removeSlide(${index}); event.stopPropagation();">
+                    <i class="bi bi-x"></i>
+                </button>
+                <div class="slide-number">Slide ${index + 1}</div>
+            `;
+            
+            return thumbnailDiv.outerHTML;
+        }).join('');
+    };
+
+    // Add new timeline functions
+    function toggleTimeline() {
+        const timeline = document.querySelector('.timeline-container');
+        timeline.classList.toggle('collapsed');
+        
+        // Update main content height
+        document.documentElement.style.setProperty(
+            '--timeline-height', 
+            timeline.classList.contains('collapsed') ? '40px' : '160px'
+        );
+    }
+
+    function scrollTimeline(direction) {
+        const container = document.querySelector('.timeline-content');
+        const scrollAmount = 200;
+        if (direction === 'left') {
+            container.scrollLeft -= scrollAmount;
+        } else {
+            container.scrollLeft += scrollAmount;
+        }
+    }
+
+    // Update the updateSlidesList function to also update timeline
+    window.updateSlidesList = function() {
+        const timelineContainer = document.querySelector('.timeline-content');
+        if (!timelineContainer) return;
+        
+        // Remove existing scroll buttons
+        const existingButtons = timelineContainer.querySelectorAll('.timeline-scroll-btn');
+        existingButtons.forEach(btn => btn.remove());
+        
+        const slidesHTML = window.ads.map((adHTML, index) => {
+            const thumbnailDiv = document.createElement('div');
+            thumbnailDiv.className = `timeline-slide ${index === currentSlide ? 'active' : ''}`;
+            thumbnailDiv.onclick = () => showSlide(index);
+            
+            // Create a temporary container to extract the background image
+            const temp = document.createElement('div');
+            temp.innerHTML = adHTML;
+            const adContainer = temp.querySelector('.ad-container');
+            const bgImage = adContainer ? 
+                adContainer.style.backgroundImage : 
+                'linear-gradient(45deg, #2a2a2a 25%, #3a3a3a 25%, #3a3a3a 50%, #2a2a2a 50%, #2a2a2a 75%, #3a3a3a 75%, #3a3a3a 100%)';
+            
+            thumbnailDiv.innerHTML = `
+                <div class="thumbnail" style="background: ${bgImage}; background-size: cover;"></div>
+                <button class="remove-btn" onclick="removeSlide(${index}); event.stopPropagation();">
+                    <i class="bi bi-x"></i>
+                </button>
+                <div class="slide-number">Slide ${index + 1}</div>
+            `;
+            
+            return thumbnailDiv.outerHTML;
+        }).join('');
+
+        // Add back the scroll buttons and slides content
+        timelineContainer.innerHTML = `
+            <button class="timeline-scroll-btn left" onclick="scrollTimeline('left')">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            ${slidesHTML}
+            <button class="timeline-scroll-btn right" onclick="scrollTimeline('right')">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        `;
+
+        // Show timeline if there are slides
+        if (window.ads.length > 0) {
+            document.querySelector('.timeline-container').classList.remove('collapsed');
+        }
+    };
+
+    // Update existing addAd event listener to show timeline after adding
+    document.getElementById('addAd').addEventListener('click', async function() {
+        const adType = document.querySelector('.ad-type-button.active').getAttribute('data-ad-type');
+        const backgroundClass = document.getElementById("backgroundSelect").value;
+        
+        // Validate background selection
+        if ((adType === "twoProducts" && !backgroundClass.startsWith('twoProducts')) ||
+            (adType === "productList" && !backgroundClass.startsWith('list'))) {
+            alert("Por favor, selecione um fundo apropriado para o tipo de anúncio.");
+            return;
+        }
+
+        let adHTML;
+
+        if (adType === "twoProducts") {
+            const product1 = {
+                title: document.getElementById("product1Title").value,
+                description: document.getElementById("product1Description").value,
+                price: document.getElementById("product1Price").value,
+                imageUrl: document.getElementById("product1Image").dataset.imageUrl
+            };
+            const product2 = {
+                title: document.getElementById("product2Title").value,
+                description: document.getElementById("product2Description").value,
+                price: document.getElementById("product2Price").value,
+                imageUrl: document.getElementById("product2Image").dataset.imageUrl
+            };
+
+            adHTML = generateAdHTML(product1, product2, product1.imageUrl, product2.imageUrl, backgroundClass);
+        } else if (adType === "productList") {
+            const selectedProducts = document.querySelectorAll('#productCheckboxes input:checked');
+            if (selectedProducts.length > 10) {
+                alert("Você só pode adicionar até 10 itens em uma lista.");
+                return;
+            }
+            adHTML = await generateListAdHTML(backgroundClass);
+        } else if (adType === "video") {
+            const videoFile = document.getElementById("videoInput").files[0];
+            if (!videoFile) {
+                alert("Por favor, selecione um vídeo.");
+                return;
+            }
+
+            const videoUrl = await uploadVideo(videoFile);
+            if (!videoUrl) {
+                alert("Erro ao fazer upload do vídeo.");
+                return;
+            }
+
+            adHTML = generateVideoAdHTML(videoUrl);
+        }
+
+        if (adHTML) {
+            window.ads.push(adHTML);
+            updatePreview();
+            updateSlidesList();
+            alert("Anúncio adicionado!");
+        }
+    });
+
+    // Adicionar função para filtrar produtos na lista
+    function filterProductsList(searchTerm) {
+        const checkboxes = document.querySelectorAll('#productCheckboxes .form-check');
+        searchTerm = searchTerm.toLowerCase();
+        
+        checkboxes.forEach(checkbox => {
+            const label = checkbox.querySelector('label').textContent.toLowerCase();
+            checkbox.style.display = label.includes(searchTerm) ? '' : 'none';
+        });
+    }
+
+    // Update default product image URL
+    function generateAdHTML(product1, product2, image1, image2, backgroundClass) {
+        const backgroundImage = getBackgroundImage(backgroundClass);
+        return `
+        <div class="ad-container" style="background-image: url('${backgroundImage}')">
+            <div class="products-container">
+                <div class="product">
+                    <img src="${image1 ? `${MASTER_URL}${image1}` : `${MASTER_URL}/default-product.png`}" alt="Produto 1">
+                    <!-- ...existing code... -->
+                </div>
+                <div class="product">
+                    <img src="${image2 ? `${MASTER_URL}${image2}` : `${MASTER_URL}/default-product.png`}" alt="Produto 2">
+                    <!-- ...existing code... -->
+                </div>
+            </div>
+        </div>
+        `;
+    }
+
+    // Update getBackgroundImage function
+    window.getBackgroundImage = function(backgroundClass) {
+        const basePath = `${MASTER_URL}/fundos/`;
+        let imagePath;
+        
+        switch (backgroundClass) {
+            case 'twoProducts1': imagePath = 'duo1.jpg'; break;
+            case 'twoProducts2': imagePath = 'duo2.jpg'; break;
+            case 'twoProducts3': imagePath = 'duo3.jpg'; break;
+            case 'list1': imagePath = 'list1.jpg'; break;
+            case 'list2': imagePath = 'list2.jpg'; break;
+            case 'list3': imagePath = 'list3.jpg'; break;
+            default:
+                return `${MASTER_URL}/default-product.png`;
+        }
+        return `${basePath}${imagePath}`;
+    };
+</script>
+
+<!-- ...existing code... -->
+
+<!-- Remover script duplicado do final e manter apenas este -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadExistingProducts();
+        toggleProduct(1);
+        toggleAdType('twoProducts');
+        loadSavedAds();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+/* Add font-face declaration at the top of the file */
+@font-face {
+    font-family: 'Giphurs';
+    src: url('/Giphurs.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family-base);
+    background-color: #f3f4f6;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Update color scheme */
+:root {
+    --primary-color: #662d91;
+    --primary-light: #8347af;
+    --primary-dark: #4a1d6e;
+    --primary-transparent: rgba(102, 45, 145, 0.1);
+    --font-family-base: 'Giphurs', Arial, sans-serif;
+}
+
+.device-list {
+    width: 100%;
+    max-width: 600px;
+    margin-top: 20px;
+}
+
+/* Enhanced device cards */
+.device {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    border: 1px solid var(--primary-transparent);
+    transition: all 0.3s ease;
+}
+
+.device:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(102, 45, 145, 0.15);
+}
+
+.device img {
+    width: 50px;
+    height: auto;
+}
+
+.device-info {
+    flex: 1;
+    margin-left: 15px;
+}
+
+.device-info h3 {
+    margin-bottom: 5px;
+    font-size: 18px;
+    color: var(--primary-color);
+}
+
+.device-info span {
+    font-size: 14px;
+    color: green;
+}
+
+.device-info .status.inoperante {
+    color: red;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+.actions button {
+    background-color: transparent;
+    border: none;
+    border-radius: 4px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.actions button:hover {
+    transform: translateY(-2px);
+}
+
+.actions button i {
+    font-size: 1.2rem;
+}
+
+.view-btn:hover {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.edit-btn:hover {
+    background-color: #ffc107;
+    color: white;
+}
+
+.ad-btn:hover {
+    background-color: #28a745;
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.actions button svg {
+    width: 20px;
+    height: 20px;
+    fill: #333;
+}
+
+/* Enhanced buttons */
+.action-btn:hover {
+    background-color: var(--primary-transparent);
+}
+
+/* Status badges */
+.badge.bg-success {
+    background-color: var(--primary-color) !important;
+}
+
+/* Panel enhancements */
+.left-panel, .right-panel {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(102, 45, 145, 0.1);
+}
+
+/* Form input enhancements */
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(102, 45, 145, 0.25);
+}
+
+@media (max-width: 768px) {
+    .device {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .device-info {
+        margin: 10px 0;
+    }
+
+    .actions {
+        width: 100%;
+        justify-content: space-around;
+    }
+}
+
+/* Update headings specifically */
+h1, h2, h3, h4, h5, h6,
+.navbar-brand,
+.nav-link,
+.btn,
+.card-title,
+.modal-title {
+    font-family: var(--font-family-base);
+}

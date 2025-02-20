@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualização do Telão</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #slideContainer {
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    .ad-container {
+      width: 1600px;
+      height: 900px;
+      background-position: center;
+      background-size: cover;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Camada de sobreposição para melhorar a legibilidade */
+    .ad-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      /* Reduzido de 0.85 para 0.5 */
+      z-index: 1;
+    }
+
+    .ad-header, .products-container {
+      position: relative;
+      z-index: 2;
+    }
+
+    .ad-header {
+      height: 120px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 60px;
+    }
+
+    .ad-header img {
+      height: 80px;
+      width: auto;
+    }
+
+    .products-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 100px;
+      padding: 20px;
+    }
+
+    .product {
+      width: 600px;
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+      background-color: rgba(255, 255, 255, 0.463);
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .product img {
+      width: 400px;
+      height: 300px;
+      object-fit: contain;
+      border-radius: 12px;
+      margin-bottom: 30px;
+    }
+
+    .product-title {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 20px 0;
+      color: #333;
+    }
+
+    .product-description {
+      font-size: 24px;
+      margin: 15px 0;
+      color: #666;
+      line-height: 1.4;
+    }
+
+    .product-price {
+      font-size: 48px;
+      color: #d9534f;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="content"></div>
+
+  <script>
+  async function loadContent() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const screenId = urlParams.get('id');
+    
+    if (!screenId) return;
+
+    try {
+      const response = await fetch(`/api/screens/${screenId}/current-content`);
+      const data = await response.json();
+      
+      if (data.success && data.content) {
+        document.getElementById('content').innerHTML = data.content;
+      } else {
+        document.getElementById('content').innerHTML = '<p>Nenhum conteúdo disponível</p>';
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      document.getElementById('content').innerHTML = '<p>Erro ao carregar conteúdo</p>';
+    }
+  }
+
+  loadContent();
+  // Atualizar a cada 5 segundos
+  setInterval(loadContent, 5000);
+  </script>
+</body>
+</html>

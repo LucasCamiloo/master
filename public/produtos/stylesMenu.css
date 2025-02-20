@@ -1,0 +1,105 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f2f2f2;
+    background-image: url(SWS_PNG.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    color: #333;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Define altura total para o body */
+}
+
+header {
+    display: flex;
+    justify-content: space-between; /* Espaçamento entre os itens */
+    align-items: center; /* Alinha os itens verticalmente */
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px; /* Menor padding para diminuir o tamanho */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.8rem; /* Tamanho reduzido do título */
+    text-align: center;
+    flex-grow: 1; /* Faz com que o título ocupe o espaço disponível */
+}
+
+header .logo {
+    width: 5%; /* Tamanho reduzido do logo */
+    height: auto;
+    margin-right: 5px; /* Menor margem entre o logo e o título */
+}
+
+header .title {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    flex-grow: 2;
+}
+
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+    padding: 20px;
+    flex-grow: 1; /* Faz com que o main ocupe o restante do espaço disponível */
+}
+
+#menu-options {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 700px;
+}
+
+.menu-item {
+    background-color: #007bff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 10px;
+    height: 10px;
+    margin: 10px;
+}
+
+.menu-button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 25px 50px;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu-button:hover {
+    background-color: #0056b3;
+}
+
+/* Rodapé */
+footer {
+    text-align: center;
+    padding: 1px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 0.9rem;
+    margin-top: 0; /* Faz com que o footer vá para o final da página */
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
