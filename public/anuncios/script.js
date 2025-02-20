@@ -1,7 +1,7 @@
 // Initialize window.ads and global variables at the top
 window.ads = [];
 window.currentSlide = 0;
-const MASTER_URL = 'https://master-teal.vercel.app'; // Single declaration
+const MASTER_URL = 'https://master-teste.vercel.app'; // Single declaration
 
 document.addEventListener("DOMContentLoaded", async () => {
     // Check if slideIntervalInput exists before using it
@@ -2056,3 +2056,130 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleAdType('twoProducts');
     loadSavedAds();
 });
+
+// Variáveis para controle de seleção de produtos
+let selectedProducts = [];
+let allProducts = [];
+let categories = [];
+
+// Função para carregar produtos no modal
+async function loadProductsModal() {
+    try {
+        const [productsResponse, categoriesResponse] = await Promise.all([
+            fetch(`${MASTER_URL}/api/products`),
+            fetch(`${MASTER_URL}/api/categories`)
+        ]);
+
+        if (!productsResponse.ok || !categoriesResponse.ok) {
+            throw new Error('Falha ao carregar dados');
+        }
+
+        const productsData = await productsResponse.json();
+        const categoriesData = await categoriesResponse.json();
+
+        allProducts = productsData.products;
+        categories = categoriesData.categories;
+
+        // Preencher select de categorias
+        const categorySelect = document.getElementById('categoryFilterModal');
+        categorySelect.innerHTML = '<option value="">Todas as categorias</option>' +
+            categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+
+        renderProductsGrid();
+    } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Falha ao carregar produtos'
+        });
+    }
+}
+
+// Função para renderizar grid de produtos
+function renderProductsGrid() {
+    const grid = document.getElementById('productsGridModal');
+    const searchTerm = document.getElementById('productSearchModal').value.toLowerCase();
+    const selectedCategory = document.getElementById('categoryFilterModal').value;
+
+    const filteredProducts = allProducts.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
+                            product.description.toLowerCase().includes(searchTerm);
+        const matchesCategory = !selectedCategory || product.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+    });
+
+    grid.innerHTML = filteredProducts.map(product => `
+        <div class="product-card ${selectedProducts.some(p => p.id === product.id) ? 'selected' : ''}"
+             onclick="toggleProductSelection('${product.id}')">
+            <img src="${product.imageUrl || '/default-product.png'}" alt="${product.name}">
+            <div class="product-name">${product.name}</div>
+            <div class="product-price">${product.price}</div>
+        </div>
+    `).join('');
+
+    updateSelectedProductsPreview();
+}
+
+// Função para alternar seleção de produto
+function toggleProductSelection(productId) {
+    const index = selectedProducts.findIndex(p => p.id === productId);
+    const product = allProducts.find(p => p.id === productId);
+
+    if (index === -1 && selectedProducts.length < 2) {
+        selectedProducts.push(product);
+    } else if (index !== -1) {
+        selectedProducts.splice(index, 1);
+    } else {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Limite atingido',
+            text: 'Você só pode selecionar 2 produtos'
+        });
+        return;
+    }
+
+    renderProductsGrid();
+}
+
+// Função para atualizar preview de produtos selecionados
+function updateSelectedProductsPreview() {
+    const preview = document.getElementById('selectedProductsPreview');
+    preview.innerHTML = selectedProducts.map(product => `
+        <div class="selected-product-preview">
+            <img src="${product.imageUrl || '/default-product.png'}" alt="${product.name}">
+            <span>${product.name}</span>
+        </div>
+    `).join('');
+}
+
+// Event listeners
+document.getElementById('productSearchModal').addEventListener('input', renderProductsGrid);
+document.getElementById('categoryFilterModal').addEventListener('change', renderProductsGrid);
+
+document.getElementById('confirmProductSelection').addEventListener('click', () => {
+    if (selectedProducts.length !== 2) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Seleção incompleta',
+            text: 'Por favor, selecione exatamente 2 produtos'
+        });
+        return;
+    }
+
+    // Preencher os campos do formulário com os produtos selecionados
+    selectedProducts.forEach((product, index) => {
+        const num = index + 1;
+        document.getElementById(`product${num}Title`).value = product.name;
+        document.getElementById(`product${num}Description`).value = product.description;
+        document.getElementById(`product${num}Price`).value = product.price;
+        document.getElementById(`product${num}Image`).dataset.imageUrl = product.imageUrl;
+    });
+
+    // Fechar o modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('productSelectionModal'));
+    modal.hide();
+});
+
+// Carregar produtos quando o modal for aberto
+document.getElementById('productSelectionModal').addEventListener('show.bs.modal', loadProductsModal);
