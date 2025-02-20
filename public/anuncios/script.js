@@ -57,6 +57,17 @@ async function initializeApp() {
 
         // Set initial state
         toggleAdType('twoProducts');
+        
+        // Initialize product toggles
+        const product1Content = document.getElementById('product-content-1');
+        if (product1Content) {
+            product1Content.style.display = 'block';
+        }
+        const icon1 = document.getElementById('toggle-icon-1');
+        if (icon1) {
+            icon1.classList.add('expanded');
+        }
+
     } catch (error) {
         console.error('Error during initialization:', error);
     }
