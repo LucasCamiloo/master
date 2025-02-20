@@ -1,4 +1,5 @@
-const MASTER_URL = 'https://master-teste.vercel.app';
+const MASTER_URL = 'https://master-teal.vercel.app';
+
 
 // Função para salvar um produto no Local Storage
 document.getElementById('product-form')?.addEventListener('submit', async function (event) {
