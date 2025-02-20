@@ -86,25 +86,44 @@ async function loadProductsModal() {
         }
 
         // Show loading state
-        grid.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
+        grid.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Carregando produtos...</div></div>';
 
         const response = await fetch(`${MASTER_URL}/api/products`);
+        console.log('API Response:', response); // Debug log
+
         if (!response.ok) throw new Error('Failed to fetch products');
         
         const data = await response.json();
+        console.log('Products data:', data); // Debug log
+
         if (!data.success || !data.products) throw new Error('Invalid product data');
 
         window.allProducts = data.products;
-        console.log('Loaded products:', data.products.length); // Debug log
 
-        renderProductsGrid(data.products);
+        // Render products grid
+        grid.innerHTML = `
+            <div class="products-grid">
+                ${data.products.map(product => `
+                    <div class="product-card ${window.selectedProducts.some(p => p.id === product.id) ? 'selected' : ''}"
+                         onclick="toggleProductSelection('${product.id}')">
+                        <img src="${product.imageUrl || '/default-product.png'}" 
+                             alt="${product.name}"
+                             onerror="this.src='${MASTER_URL}/default-product.png'">
+                        <div class="product-info">
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-price">${product.price}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        // Update preview of selected products
         updateSelectedProductsPreview();
+
     } catch (error) {
         console.error('Error loading products:', error);
-        const grid = document.getElementById('productsGridModal');
-        if (grid) {
-            grid.innerHTML = '<div class="alert alert-danger">Error loading products</div>';
-        }
+        grid.innerHTML = '<div class="alert alert-danger m-3">Error loading products</div>';
     }
 }
 
@@ -1646,6 +1665,7 @@ window.toggleAdType = function(adType) {
     const productListSection = document.getElementById("productListSection");
     const videoSection = document.getElementById("videoSection");
     const backgroundSelect = document.getElementById("backgroundSelect");
+    const productSelectionBtn = document.querySelector('[data-bs-target="#productSelectionModal"]');
     
     if (!twoProductsSection || !productListSection || !videoSection || !backgroundSelect) {
         console.error('Required sections not found');
@@ -1665,22 +1685,28 @@ window.toggleAdType = function(adType) {
     productListSection.style.display = "none";
     videoSection.style.display = "none";
 
+    // Clear selected products when changing ad type
+    window.selectedProducts = [];
+
     // Show appropriate section
     switch (adType) {
         case "twoProducts":
             twoProductsSection.style.display = "block";
             backgroundSelect.closest('.form-section').style.display = "block";
+            if (productSelectionBtn) productSelectionBtn.style.display = "block";
             window.updateBackgroundOptions("twoProducts");
             break;
         case "productList":
             productListSection.style.display = "block";
             backgroundSelect.closest('.form-section').style.display = "block";
+            if (productSelectionBtn) productSelectionBtn.style.display = "none";
             window.updateBackgroundOptions("productList");
-            window.loadProductsForSelection(); // Use window.loadProductsForSelection
+            window.loadProductsForSelection();
             break;
         case "video":
             videoSection.style.display = "block";
             backgroundSelect.closest('.form-section').style.display = "none";
+            if (productSelectionBtn) productSelectionBtn.style.display = "none";
             break;
     }
 };
@@ -2176,25 +2202,44 @@ async function loadProductsModal() {
         }
 
         // Show loading state
-        grid.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
+        grid.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><div class="mt-2">Carregando produtos...</div></div>';
 
         const response = await fetch(`${MASTER_URL}/api/products`);
+        console.log('API Response:', response); // Debug log
+
         if (!response.ok) throw new Error('Failed to fetch products');
         
         const data = await response.json();
+        console.log('Products data:', data); // Debug log
+
         if (!data.success || !data.products) throw new Error('Invalid product data');
 
         window.allProducts = data.products;
-        console.log('Loaded products:', data.products.length); // Debug log
 
-        renderProductsGrid(data.products);
+        // Render products grid
+        grid.innerHTML = `
+            <div class="products-grid">
+                ${data.products.map(product => `
+                    <div class="product-card ${window.selectedProducts.some(p => p.id === product.id) ? 'selected' : ''}"
+                         onclick="toggleProductSelection('${product.id}')">
+                        <img src="${product.imageUrl || '/default-product.png'}" 
+                             alt="${product.name}"
+                             onerror="this.src='${MASTER_URL}/default-product.png'">
+                        <div class="product-info">
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-price">${product.price}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        // Update preview of selected products
         updateSelectedProductsPreview();
+
     } catch (error) {
         console.error('Error loading products:', error);
-        const grid = document.getElementById('productsGridModal');
-        if (grid) {
-            grid.innerHTML = '<div class="alert alert-danger">Error loading products</div>';
-        }
+        grid.innerHTML = '<div class="alert alert-danger m-3">Error loading products</div>';
     }
 }
 
@@ -2222,7 +2267,7 @@ function renderProductsGrid(products) {
                      onclick="toggleProductSelection('${product.id}')">
                     <img src="${product.imageUrl || '/default-product.png'}" 
                          alt="${product.name}"
-                         onerror="this.src='${MASTER_URL}/default-product.png'">
+                         onerror="this.src='${MASTER_URL}/default-product.png'}">
                     <div class="product-info">
                         <div class="product-name">${product.name}</div>
                         <div class="product-price">${product.price}</div>
@@ -2379,6 +2424,7 @@ function toggleAdType(adType) {
     const productListSection = document.getElementById("productListSection");
     const videoSection = document.getElementById("videoSection");
     const backgroundSelect = document.getElementById("backgroundSelect");
+    const productSelectionBtn = document.querySelector('[data-bs-target="#productSelectionModal"]');
     
     if (!twoProductsSection || !productListSection || !videoSection || !backgroundSelect) {
         console.error('Required sections not found');
@@ -2398,21 +2444,28 @@ function toggleAdType(adType) {
     productListSection.style.display = "none";
     videoSection.style.display = "none";
 
+    // Clear selected products when changing ad type
+    window.selectedProducts = [];
+
     // Show appropriate section
     switch (adType) {
         case "twoProducts":
             twoProductsSection.style.display = "block";
             backgroundSelect.closest('.form-section').style.display = "block";
-            updateBackgroundOptions("twoProducts");
+            if (productSelectionBtn) productSelectionBtn.style.display = "block";
+            window.updateBackgroundOptions("twoProducts");
             break;
         case "productList":
             productListSection.style.display = "block";
             backgroundSelect.closest('.form-section').style.display = "block";
-            loadProductsForSelection();
+            if (productSelectionBtn) productSelectionBtn.style.display = "none";
+            window.updateBackgroundOptions("productList");
+            window.loadProductsForSelection();
             break;
         case "video":
             videoSection.style.display = "block";
             backgroundSelect.closest('.form-section').style.display = "none";
+            if (productSelectionBtn) productSelectionBtn.style.display = "none";
             break;
     }
 }
