@@ -344,3 +344,59 @@ async function saveToAPI(product) {
         throw error;
     }
 }
+
+async function addNewCategory(categoryName) {
+    try {
+        const response = await fetch(`${MASTER_URL}/api/categories`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name: categoryName })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.error('Erro ao adicionar categoria:', error);
+        return false;
+    }
+}
+
+// Atualizar a função toggleNewCategory para usar a API
+async function toggleNewCategory() {
+    const newCategoryDiv = document.getElementById('new-category-input');
+    const newCategoryInput = document.getElementById('new-category');
+    const selectElement = document.getElementById('product-category');
+    
+    if (newCategoryDiv.style.display === 'none') {
+        newCategoryDiv.style.display = 'block';
+        newCategoryInput.focus();
+        
+        newCategoryInput.onkeydown = async function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const newCategory = this.value.trim();
+                if (newCategory) {
+                    const success = await addNewCategory(newCategory);
+                    if (success) {
+                        const option = new Option(newCategory, newCategory);
+                        selectElement.appendChild(option);
+                        selectElement.value = newCategory;
+                        
+                        this.value = '';
+                        newCategoryDiv.style.display = 'none';
+                    }
+                }
+            } else if (e.key === 'Escape') {
+                this.value = '';
+                newCategoryDiv.style.display = 'none';
+            }
+        };
+    } else {
+        newCategoryDiv.style.display = 'none';
+    }
+}
