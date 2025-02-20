@@ -142,6 +142,32 @@
             padding: 1rem;
             margin-bottom: 1rem;
         }
+
+        /* Add to your existing styles */
+        .category-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .tags {
+            margin: 8px 0;
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: var(--primary-transparent);
+            color: var(--primary-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 2px;
+            font-size: 0.8rem;
+        }
     </style>
     <script src="script.js" defer></script>
 </head>
@@ -203,10 +229,26 @@
             <div class="content-card">
                 <h2 class="mb-4 text-center">Confira os produtos disponíveis:</h2>
                 
-                <!-- Search bar -->
-                <div class="mb-4">
-                    <input type="text" id="productSearchInput" class="form-control" 
-                           placeholder="Pesquisar produtos por nome ou descrição...">
+                <!-- Add filtering controls -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <input type="text" id="productSearchInput" class="form-control" 
+                               placeholder="Pesquisar produtos...">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-control" id="categoryFilter">
+                            <option value="">Todas as categorias</option>
+                            <!-- As categorias serão carregadas dinamicamente aqui -->
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-control" id="sortFilter">
+                            <option value="nameAsc">Nome (A-Z)</option>
+                            <option value="nameDesc">Nome (Z-A)</option>
+                            <option value="priceAsc">Preço (Menor-Maior)</option>
+                            <option value="priceDesc">Preço (Maior-Menor)</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             
@@ -260,12 +302,13 @@
     <script>
         const MASTER_URL = 'https://master-teste.vercel.app';
 
-        document.addEventListener('DOMContentLoaded', function() {
-            loadProducts();
-            document.getElementById('productSearchInput').addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                filterProducts(searchTerm);
-            });
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadProducts();
+            await loadCategoryFilter();
+            // Add event listeners for filters
+            document.getElementById('productSearchInput').addEventListener('input', filterProducts);
+            document.getElementById('categoryFilter').addEventListener('change', filterProducts);
+            document.getElementById('sortFilter').addEventListener('change', filterProducts);
         });
 
         async function loadProducts() {
@@ -273,43 +316,8 @@
                 const response = await fetch(`${MASTER_URL}/api/products`);
                 if (!response.ok) throw new Error('Failed to load products');
                 const data = await response.json();
-                const container = document.getElementById('product-container');
-                container.innerHTML = '';
-                
-                if (!data.success || !data.products || data.products.length === 0) {
-                    container.innerHTML = '<div class="text-center"><p>Nenhum produto adicionado.</p></div>';
-                    return;
-                }
-
-                data.products.forEach(product => {
-                    const productElement = document.createElement('div');
-                    productElement.className = 'product-item';
-                    productElement.dataset.name = product.name.toLowerCase();
-                    productElement.dataset.description = product.description.toLowerCase();
-
-                    const imageUrl = product.imageUrl || `${MASTER_URL}/files/default-product`;
-                    console.log('Processing product:', { name: product.name, imageUrl });
-
-                    productElement.innerHTML = `
-                        <img src="${imageUrl}" 
-                             alt="${product.name}" 
-                             onerror="this.src='${MASTER_URL}/files/default-product';"
-                             class="product-image">
-                        <h3>${product.name}</h3>
-                        <p>${product.description}</p>
-                        <p class="fw-bold">${product.price}</p>
-                        <div class="btn-group">
-                            <button class="btn btn-primary" onclick="editProduct('${product.id}')">
-                                <i class="bi bi-pencil"></i> Editar
-                            </button>
-                            <button class="btn btn-danger" onclick="deleteProduct('${product.id}')">
-                                <i class="bi bi-trash"></i> Excluir
-                            </button>
-                        </div>
-                    `;
-
-                    container.appendChild(productElement);
-                });
+                window.allProducts = data.products; // Store all products globally
+                filterProducts(); // Initial display with filters
             } catch (error) {
                 console.error('Error loading products:', error);
                 const container = document.getElementById('product-container');
@@ -319,13 +327,101 @@
             }
         }
 
-        function filterProducts(searchTerm) {
-            const products = document.querySelectorAll('.product-item');
+        async function loadCategoryFilter() {
+            try {
+                const response = await fetch(`${MASTER_URL}/api/categories`);
+                const data = await response.json();
+                const select = document.getElementById('categoryFilter');
+                
+                // Manter a opção "Todas as categorias"
+                select.innerHTML = '<option value="">Todas as categorias</option>';
+                
+                // Adicionar categorias únicas
+                const categories = new Set();
+                window.allProducts.forEach(product => {
+                    if (product.category) {
+                        categories.add(product.category);
+                    }
+                });
+                
+                // Adicionar opções ao select
+                Array.from(categories).sort().forEach(category => {
+                    const option = new Option(category, category);
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+            }
+        }
+
+        function filterProducts() {
+            const searchTerm = document.getElementById('productSearchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const sortFilter = document.getElementById('sortFilter').value;
+            
+            let filteredProducts = window.allProducts.filter(product => {
+                const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
+                                    product.description.toLowerCase().includes(searchTerm);
+                const matchesCategory = !categoryFilter || product.category === categoryFilter;
+                return matchesSearch && matchesCategory;
+            });
+
+            // Sort products
+            filteredProducts.sort((a, b) => {
+                switch(sortFilter) {
+                    case 'nameAsc':
+                        return a.name.localeCompare(b.name);
+                    case 'nameDesc':
+                        return b.name.localeCompare(a.name);
+                    case 'priceAsc':
+                        return parseFloat(a.price.replace(/[^\d.,]/g, '')) - parseFloat(b.price.replace(/[^\d.,]/g, ''));
+                    case 'priceDesc':
+                        return parseFloat(b.price.replace(/[^\d.,]/g, '')) - parseFloat(a.price.replace(/[^\d.,]/g, ''));
+                    default:
+                        return 0;
+                }
+            });
+
+            displayProducts(filteredProducts);
+        }
+
+        function displayProducts(products) {
+            const container = document.getElementById('product-container');
+            container.innerHTML = '';
+
+            if (products.length === 0) {
+                container.innerHTML = '<div class="text-center">Nenhum produto encontrado</div>';
+                return;
+            }
+
             products.forEach(product => {
-                const name = product.dataset.name;
-                const description = product.dataset.description;
-                const shouldShow = name.includes(searchTerm) || description.includes(searchTerm);
-                product.style.display = shouldShow ? '' : 'none';
+                const productElement = document.createElement('div');
+                productElement.className = 'product-item';
+                
+                const imageUrl = product.imageUrl || `${MASTER_URL}/files/default-product`;
+                
+                productElement.innerHTML = `
+                    <img src="${imageUrl}" 
+                         alt="${product.name}" 
+                         onerror="this.src='${MASTER_URL}/files/default-product'">
+                    <div class="category-badge">${product.category}</div>
+                    <h3>${product.name}</h3>
+                    <p>${product.description}</p>
+                    <p class="fw-bold">${product.price}</p>
+                    <div class="tags">
+                        ${(product.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="editProduct('${product.id}')">
+                            <i class="bi bi-pencil"></i> Editar
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteProduct('${product.id}')">
+                            <i class="bi bi-trash"></i> Excluir
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(productElement);
             });
         }
 
