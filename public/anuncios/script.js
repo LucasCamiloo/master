@@ -2014,7 +2014,7 @@ window.removeSlide = function(index) {
         // Remover o slide
         window.ads.splice(index, 1);
 
-        // Ajustar o índice atual
+        // Ajustar o índice atual se necessário
         if (window.currentSlide >= window.ads.length) {
             window.currentSlide = Math.max(0, window.ads.length - 1);
         }
@@ -2618,3 +2618,68 @@ async function loadModalProducts() {
 }
 
 // ...
+
+async function handleAddAd() {
+    const adTypeButton = document.querySelector('.ad-type-button.active');
+    if (!adTypeButton) {
+        alert('Selecione um tipo de anúncio primeiro');
+        return;
+    }
+
+    const adType = adTypeButton.getAttribute('data-ad-type');
+    const backgroundSelect = document.getElementById("backgroundSelect");
+    
+    if (!backgroundSelect) {
+        alert('Elemento de seleção de fundo não encontrado');
+        return;
+    }
+
+    const backgroundClass = backgroundSelect.value;
+
+    // Validate background selection
+    if ((adType === "twoProducts" && !backgroundClass.startsWith('twoProducts')) ||
+        (adType === "productList" && !backgroundClass.startsWith('list'))) {
+        alert("Por favor, selecione um fundo apropriado para o tipo de anúncio.");
+        return;
+    }
+
+    if (adType === "twoProducts" && (!selectedProducts || selectedProducts.length !== 2)) {
+        alert("Por favor, selecione exatamente 2 produtos primeiro.");
+        return;
+    }
+
+    let adHTML;
+
+    try {
+        if (adType === "twoProducts") {
+            adHTML = window.generateAdHTML(backgroundClass);
+        } else if (adType === "productList") {
+            adHTML = await generateListAdHTML(backgroundClass);
+        } else if (adType === "video") {
+            const videoUrl = document.getElementById("videoUrl")?.value?.trim();
+            if (!videoUrl) {
+                alert("Por favor, insira a URL do vídeo.");
+                return;
+            }
+            adHTML = generateVideoAdHTML(videoUrl);
+        }
+
+        if (adHTML) {
+            window.ads.push(adHTML);
+            window.currentSlide = window.ads.length - 1;
+            window.updatePreview();
+            Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: 'Anúncio adicionado!'
+            });
+
+            // Clear selections
+            selectedProducts = [];
+            updateSelectedCount();
+        }
+    } catch (error) {
+        console.error('Erro ao adicionar anúncio:', error);
+        alert('Erro ao adicionar anúncio: ' + error.message);
+    }
+}
