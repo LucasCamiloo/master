@@ -1,8 +1,11 @@
-// Initialize window.ads and global variables at the top
+const MASTER_URL = 'https://master-teal.vercel.app';
+
+// Initialize global state
 window.ads = [];
 window.currentSlide = 0;
 window.selectedProducts = [];
-const MASTER_URL = 'https://master-teal.vercel.app';
+window.allProducts = [];
+window.categories = [];
 
 // Add a function to safely get elements
 function getElement(id) {
@@ -73,28 +76,49 @@ async function initializeApp() {
     }
 }
 
-// Single definition of loadExistingProducts
-async function loadExistingProducts() {
+// Single definition of loadExistingProducts and related functions
+async function loadProductsModal() {
+    try {
+        const response = await fetch(`${MASTER_URL}/api/products`);
+        if (!response.ok) throw new Error('Failed to fetch products');
+        
+        const data = await response.json();
+        if (!data.success) throw new Error('Invalid product data');
+
+        window.allProducts = data.products;
+
+        // Update grid
+        const grid = document.getElementById('productsGridModal');
+        if (!grid) return;
+
+        grid.innerHTML = data.products.map(product => `
+            <div class="product-card ${window.selectedProducts.some(p => p.id === product.id) ? 'selected' : ''}"
+                 onclick="toggleProductSelection('${product.id}')">
+                <img src="${product.imageUrl || '/default-product.png'}" alt="${product.name}">
+                <div class="product-name">${product.name}</div>
+                <div class="product-price">${product.price}</div>
+            </div>
+        `).join('');
+
+        updateSelectedProductsPreview();
+    } catch (error) {
+        console.error('Error loading products:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to load products'
+        });
+    }
+}
+
+// Remove duplicate loadExistingProducts function and use this one
+window.loadExistingProducts = async function() {
     try {
         const response = await fetch(`${MASTER_URL}/api/products`);
         const data = await response.json();
 
         if (data.success && data.products) {
             window.allProducts = data.products;
-
-            const product1Select = document.getElementById('product1Select');
-            const product2Select = document.getElementById('product2Select');
-
-            if (product1Select && product2Select) {
-                const options = data.products.map(product => 
-                    `<option value="${product.id}">${product.name}</option>`
-                ).join('');
-
-                const defaultOption = '<option value="">Selecione um produto</option>';
-                product1Select.innerHTML = defaultOption + options;
-                product2Select.innerHTML = defaultOption + options;
-            }
-
             return data.products;
         }
         return [];
@@ -102,7 +126,7 @@ async function loadExistingProducts() {
         console.error('Error loading products:', error);
         return [];
     }
-}
+};
 
 // Update handleProductSelection function
 async function handleProductSelection() {
@@ -147,19 +171,29 @@ async function handleProductSelection() {
 // Update DOMContentLoaded event listener
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        await loadExistingProducts();
-        
-        // Initialize product toggles
-        const product1Content = document.getElementById('product-content-1');
-        const icon1 = document.getElementById('toggle-icon-1');
-        
-        if (product1Content && icon1) {
-            product1Content.style.display = 'block';
-            icon1.classList.add('expanded');
+        // Attach modal event listener
+        const productModal = document.getElementById('productSelectionModal');
+        if (productModal) {
+            productModal.addEventListener('show.bs.modal', loadProductsModal);
         }
 
-        toggleAdType('twoProducts');
+        // Initialize search and filter
+        const searchInput = document.getElementById('productSearchModal');
+        const categoryFilter = document.getElementById('categoryFilterModal');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', renderProductsGrid);
+        }
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', renderProductsGrid);
+        }
+
+        // Load initial data
+        await loadExistingProducts();
         await loadSavedAds();
+        
+        // Set initial state
+        toggleAdType('twoProducts');
     } catch (error) {
         console.error('Error during initialization:', error);
     }
@@ -1055,75 +1089,6 @@ document.getElementById('closePreviewModal').addEventListener('click', () => {
 });
 
 // Carregar anúncios salvos quando a página carregar
-
-
-// Função para carregar produtos existentes
-async function loadExistingProducts() {
-    try {
-        // Remove localStorage and only use API
-        const response = await fetch(`${MASTER_URL}/api/products`);
-        const apiData = await response.json();
-
-        if (apiData.success && apiData.products) {
-            const allProducts = apiData.products;
-            console.log('Total de produtos:', allProducts.length);
-
-            // Atualizar os selects
-            const product1Select = document.getElementById('product1Select');
-            const product2Select = document.getElementById('product2Select');
-
-            if (product1Select && product2Select) {
-                const options = allProducts.map(product => 
-                    `<option value="${product.id}">${product.name}</option>`
-                ).join('');
-
-                const defaultOption = '<option value="">Selecione um produto</option>';
-                product1Select.innerHTML = defaultOption + options;
-                product2Select.innerHTML = defaultOption + options;
-            }
-
-            return allProducts;
-        }
-        return [];
-    } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
-        return [];
-    }
-}
-
-// Update loadProduct function to use API instead of localStorage
-async function loadProduct(productId, productNumber) {
-    try {
-        console.log(`Loading product ${productId} for position ${productNumber}`);
-        const response = await fetch(`${MASTER_URL}/api/products/${productId}`);
-        const data = await response.json();
-
-        if (data.success && data.product) {
-            const product = data.product;
-            document.getElementById(`product${productNumber}Title`).value = product.name;
-            document.getElementById(`product${productNumber}Description`).value = product.description;
-            document.getElementById(`product${productNumber}Price`).value = product.price;
-
-            if (product.imageUrl) {
-                document.getElementById(`product${productNumber}Image`).dataset.imageUrl = product.imageUrl;
-
-                const container = document.getElementById(`product${productNumber}Image`).parentElement;
-                let preview = container.querySelector('img');
-                if (!preview) {
-                    preview = document.createElement('img');
-                    preview.className = 'img-preview mt-2';
-                    preview.style.maxWidth = '200px';
-                    container.appendChild(preview);
-                }
-                preview.src = product.imageUrl;
-            }
-        } else {
-            console.log('Product not found');
-        }
-    } catch (error) {
-        console.error('Error loading product:', error);
-    }
-}
 
 // Remove filterProducts function that used localStorage
 window.filterProducts = function(productNumber) {
