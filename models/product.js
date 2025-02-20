@@ -40,7 +40,7 @@ const productSchema = new mongoose.Schema({
 productSchema.virtual('fullImageUrl').get(function() {
     if (!this.imageUrl) return null;
     if (this.imageUrl.startsWith('http')) return this.imageUrl;
-    return `${process.env.MASTER_URL || 'https://master-teste.vercel.app'}${this.imageUrl.startsWith('/') ? '' : '/'}${this.imageUrl}`;
+    return `${process.env.MASTER_URL || 'https://master-teal.vercel.app'}${this.imageUrl.startsWith('/') ? '' : '/'}${this.imageUrl}`;
 });
 
 const Product = mongoose.model('Product', productSchema);
