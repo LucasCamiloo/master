@@ -1,6 +1,5 @@
 const MASTER_URL = 'https://master-teal.vercel.app';
 
-
 // Função para salvar um produto no Local Storage
 document.getElementById('product-form')?.addEventListener('submit', async function (event) {
     event.preventDefault(); // Prevent default form submission
@@ -319,20 +318,23 @@ function importProducts() {
 async function saveToAPI(product) {
     try {
         console.log('Iniciando salvamento do produto:', product);
-        const formData = new FormData();
         
-        formData.append('name', product.name);
-        formData.append('description', product.description);
-        formData.append('price', product.price);
-
-        // Alterado: envia imagem via campo "image", não "imageUrl"
-        if (product.image) {
-            formData.append('image', product.image);
-        }
+        // Criar objeto com os dados do produto
+        const productData = {
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            imageUrl: product.image,
+            category: product.category || 'Outros',
+            tags: product.tags || []
+        };
         
         const response = await fetch(`${MASTER_URL}/api/products`, {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(productData)
         });
 
         if (!response.ok) {
