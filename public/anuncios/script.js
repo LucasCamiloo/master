@@ -2183,3 +2183,122 @@ document.getElementById('confirmProductSelection').addEventListener('click', () 
 
 // Carregar produtos quando o modal for aberto
 document.getElementById('productSelectionModal').addEventListener('show.bs.modal', loadProductsModal);
+
+// Remover função toggleProduct antiga e substituir por:
+function updateProductPreview(product, number) {
+    const previewCard = document.getElementById(`product${number}Preview`);
+    if (!previewCard) return;
+
+    const img = previewCard.querySelector('img');
+    const title = previewCard.querySelector('.product-preview-title');
+    const price = previewCard.querySelector('.product-preview-price');
+
+    if (product) {
+        img.src = product.imageUrl || '/default-product.png';
+        title.textContent = product.name;
+        price.textContent = product.price;
+    } else {
+        img.src = '/default-product.png';
+        title.textContent = `Produto ${number} não selecionado`;
+        price.textContent = 'R$ 0,00';
+    }
+}
+
+// Atualizar o event listener do confirmProductSelection
+document.getElementById('confirmProductSelection')?.addEventListener('click', () => {
+    if (selectedProducts.length !== 2) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Seleção incompleta',
+            text: 'Por favor, selecione exatamente 2 produtos'
+        });
+        return;
+    }
+
+    // Atualizar os previews
+    selectedProducts.forEach((product, index) => {
+        updateProductPreview(product, index + 1);
+    });
+
+    // Fechar o modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('productSelectionModal'));
+    if (modal) {
+        modal.hide();
+    }
+});
+
+// Atualizar função de inicialização
+document.addEventListener('DOMContentLoaded', async function() {
+    // Carregar produtos no modal quando ele for aberto
+    const productModal = document.getElementById('productSelectionModal');
+    if (productModal) {
+        productModal.addEventListener('show.bs.modal', loadProductsModal);
+    }
+
+    // Inicializar busca e filtros do modal
+    const searchInput = document.getElementById('productSearchModal');
+    const categoryFilter = document.getElementById('categoryFilterModal');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', renderProductsGrid);
+    }
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', renderProductsGrid);
+    }
+
+    // Configurar estado inicial
+    try {
+        await loadSavedAds();
+        toggleAdType('twoProducts');
+    } catch (error) {
+        console.error('Erro na inicialização:', error);
+    }
+});
+
+// Atualizar função toggleAdType
+function toggleAdType(adType) {
+    console.log('Toggling ad type:', adType);
+    
+    const twoProductsSection = document.getElementById("twoProductsSection");
+    const productListSection = document.getElementById("productListSection");
+    const videoSection = document.getElementById("videoSection");
+    const backgroundSelect = document.getElementById("backgroundSelect");
+    
+    if (!twoProductsSection || !productListSection || !videoSection || !backgroundSelect) {
+        console.error('Required sections not found');
+        return;
+    }
+
+    // Update button states
+    document.querySelectorAll('.ad-type-button').forEach(button => {
+        button.classList.remove('active');
+        if (button.getAttribute('data-ad-type') === adType) {
+            button.classList.add('active');
+        }
+    });
+
+    // Hide all sections first
+    twoProductsSection.style.display = "none";
+    productListSection.style.display = "none";
+    videoSection.style.display = "none";
+
+    // Show appropriate section
+    switch (adType) {
+        case "twoProducts":
+            twoProductsSection.style.display = "block";
+            backgroundSelect.closest('.form-section').style.display = "block";
+            updateBackgroundOptions("twoProducts");
+            break;
+        case "productList":
+            productListSection.style.display = "block";
+            backgroundSelect.closest('.form-section').style.display = "block";
+            loadProductsForSelection();
+            break;
+        case "video":
+            videoSection.style.display = "block";
+            backgroundSelect.closest('.form-section').style.display = "none";
+            break;
+    }
+}
+
+// ...existing code...
