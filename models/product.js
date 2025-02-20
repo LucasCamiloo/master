@@ -25,11 +25,9 @@ const productSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        required: true
-    },
-    tags: [{
-        type: String
-    }]
+        required: true,
+        default: 'Outros' // Adiciona uma categoria padrão
+    }
 }, { 
     timestamps: true,
     toJSON: { virtuals: true },
