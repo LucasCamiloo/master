@@ -2683,3 +2683,127 @@ async function handleAddAd() {
         alert('Erro ao adicionar anúncio: ' + error.message);
     }
 }
+
+// Add missing handleSaveAd function
+function handleSaveAd() {
+    if (!window.ads || window.ads.length === 0) {
+        alert('Adicione pelo menos um slide antes de salvar');
+        return;
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('saveAdModal'));
+    modal.show();
+}
+
+// Fix toggleProduct function to handle missing elements
+function toggleProduct(number) {
+    const content = document.getElementById(`product-content-${number}`);
+    const icon = document.getElementById(`toggle-icon-${number}`);
+    
+    if (!content || !icon) {
+        // Element not found, silently return
+        return;
+    }
+    
+    content.classList.toggle('expanded');
+    icon.classList.toggle('expanded');
+}
+
+// Fix product selection initialization
+window.openProductSelectionModal = async function() {
+    try {
+        const modal = new bootstrap.Modal(document.getElementById('productSelectionModal'));
+        if (!modal) {
+            console.error('Product selection modal not found');
+            return;
+        }
+
+        selectedProducts = []; // Reset selection
+        await loadModalProducts();
+        updateSelectedCount();
+        modal.show();
+    } catch (error) {
+        console.error('Error opening product selection modal:', error);
+    }
+};
+
+// Fix loadModalProducts function
+async function loadModalProducts() {
+    try {
+        const productsContainer = document.getElementById('productsListContainer');
+        if (!productsContainer) {
+            console.error('Products container not found');
+            return;
+        }
+
+        productsContainer.innerHTML = '<div class="text-center">Carregando produtos...</div>';
+
+        const response = await fetch(`${MASTER_URL}/api/products`);
+        const data = await response.json();
+        
+        if (data.success && data.products) {
+            productsContainer.innerHTML = data.products.map(product => `
+                <div class="col-md-3 mb-3">
+                    <div class="card h-100 product-card" 
+                         onclick="toggleProductSelection('${product.id}')">
+                        <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
+                             class="card-img-top p-2" alt="${product.name}">
+                        <div class="card-body">
+                            <h6 class="card-title">${product.name}</h6>
+                            <p class="card-text text-primary">${product.price}</p>
+                        </div>
+                        <div class="card-footer">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input product-checkbox" 
+                                       value="${product.id}"
+                                       data-name="${product.name}"
+                                       data-price="${product.price}"
+                                       data-image="${product.imageUrl || ''}">
+                                <label class="form-check-label">Selecionar</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            productsContainer.innerHTML = '<div class="alert alert-warning">Nenhum produto encontrado</div>';
+        }
+    } catch (error) {
+        console.error('Error loading products:', error);
+        if (productsContainer) {
+            productsContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar produtos</div>';
+        }
+    }
+}
+
+// Update DOMContentLoaded event listener
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        // Initialize buttons with null checks
+        const addAdButton = document.getElementById('addAd');
+        const saveAdButton = document.getElementById('saveAd');
+
+        if (addAdButton) {
+            addAdButton.addEventListener('click', handleAddAd);
+        }
+
+        if (saveAdButton) {
+            saveAdButton.addEventListener('click', handleSaveAd);
+        }
+
+        // Load initial data
+        await Promise.all([
+            loadExistingProducts(),
+            loadSavedAds()
+        ]);
+
+        // Initialize default view
+        const defaultAdType = 'twoProducts';
+        const adTypeButton = document.querySelector(`[data-ad-type="${defaultAdType}"]`);
+        if (adTypeButton) {
+            toggleAdType(defaultAdType);
+        }
+    } catch (error) {
+        console.error('Error during initialization:', error);
+    }
+});
