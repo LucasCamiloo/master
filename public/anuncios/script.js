@@ -2056,3 +2056,58 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleAdType('twoProducts');
     loadSavedAds();
 });
+
+// Adicionar função para abrir modal de seleção
+window.openProductSelectionModal = function(productNumber) {
+  const modal = new bootstrap.Modal(document.getElementById('productSelectionModal'));
+  // Salvar qual produto estamos selecionando (ex: 1 ou 2) em uma variável global
+  window.selectedProductSlot = productNumber;
+  // Preencher modal com lista de produtos
+  loadModalProducts();
+  modal.show();
+};
+
+// Função para carregar produtos no container do modal
+async function loadModalProducts() {
+  const container = document.getElementById('productsListContainer');
+  const filterValue = document.getElementById('searchByCategory').value.toLowerCase();
+  // ...existing code que obtém produtos da API...
+  // Filtrar por categoria
+  const filteredProducts = data.products.filter(p => p.category.toLowerCase().includes(filterValue));
+  container.innerHTML = filteredProducts.map(p => `
+    <div class="col-3 mb-3">
+      <div class="card" onclick="selectProduct('${p._id}', '${p.name}', '${p.description}', '${p.price}', '${p.imageUrl}')">
+        <img src="${p.imageUrl}" class="card-img-top" alt="${p.name}">
+        <div class="card-body">
+          <h5 class="card-title">${p.name}</h5>
+          <p class="card-text">${p.description}</p>
+          <span class="badge bg-primary">${p.price}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Escolher produto e fechar modal
+window.selectProduct = function(id, name, description, price, imageUrl) {
+  if (window.selectedProductSlot === 1) {
+    document.getElementById('product1Title').value = name;
+    document.getElementById('product1Description').value = description;
+    document.getElementById('product1Price').value = price;
+    document.getElementById('product1Image').dataset.imageUrl = imageUrl;
+  } else {
+    document.getElementById('product2Title').value = name;
+    document.getElementById('product2Description').value = description;
+    document.getElementById('product2Price').value = price;
+    document.getElementById('product2Image').dataset.imageUrl = imageUrl;
+  }
+};
+
+// Fechar modal ao confirmar (poderia fechar automaticamente ao clicar no produto, se preferir)
+document.getElementById('confirmSelection').addEventListener('click', () => {
+  const modalEl = document.getElementById('productSelectionModal');
+  if (modalEl) bootstrap.Modal.getInstance(modalEl).hide();
+});
+
+// Atualizar campo de busca de categorias em tempo real
+document.getElementById('searchByCategory').addEventListener('input', loadModalProducts);
