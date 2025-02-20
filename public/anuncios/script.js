@@ -1,7 +1,7 @@
 // Initialize window.ads and global variables at the top
 window.ads = [];
 window.currentSlide = 0;
-const MASTER_URL = 'https://master-teste.vercel.app'; // Single declaration
+const MASTER_URL = 'https://master-teal.vercel.app'; // Single declaration
 
 document.addEventListener("DOMContentLoaded", async () => {
     // Check if slideIntervalInput exists before using it
