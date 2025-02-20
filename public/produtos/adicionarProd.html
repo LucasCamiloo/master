@@ -229,69 +229,70 @@
 
         async function importProducts() {
             const fileInput = document.getElementById('import-file');
-            if (!fileInput.files.length) {
-                alert('Por favor, selecione um arquivo.');
-                return;
-            }
+            console.log('Iniciando importação...');
 
-            const file = fileInput.files[0];
-            const reader = new FileReader();
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = async function(e) {
+                    try {
+                        const fileContent = e.target.result;
+                        console.log('Conteúdo do arquivo:', fileContent);
 
-            reader.onload = async function(event) {
-                try {
-                    const content = event.target.result;
-                    const products = JSON.parse(content);
-                    document.getElementById('loading').style.display = 'block';
+                        const productData = JSON.parse(fileContent);
+                        console.log('Dados parseados:', productData);
 
-                    for (const item of products) {
-                        const product = item.produto;
-                        const formData = new FormData();
-                        formData.append('name', product.nome);
-                        formData.append('description', product.descricao.substring(0, 180));
-                        formData.append('price', `R$ ${product.preco}`);
-
-                        if (product.foto) {
-                            try {
-                                // Use the proxy endpoint to fetch the image
-                                const proxyUrl = `${MASTER_URL}/proxy?url=${encodeURIComponent(product.foto)}`;
-                                const imageResponse = await fetch(proxyUrl);
-                                
-                                if (!imageResponse.ok) {
-                                    throw new Error('Failed to fetch image through proxy');
+                        // Mostrar indicador de carregamento
+                        document.getElementById('loading').style.display = 'block';
+                        
+                        for (const item of productData) {
+                            if (!item.produto) continue;
+                            
+                            // Se houver categoria, verifica se precisa criar
+                            if (item.produto.categoria) {
+                                try {
+                                    await addNewCategory(item.produto.categoria);
+                                } catch (error) {
+                                    console.error('Erro ao criar categoria:', error);
                                 }
+                            }
 
-                                const blob = await imageResponse.blob();
-                                formData.append('image', blob, 'product-image.jpg');
-                            } catch (imageError) {
-                                console.error('Error processing image:', imageError);
-                                // Continue without image if there's an error
+                            const product = {
+                                name: item.produto.nome,
+                                description: item.produto.descricao,
+                                price: typeof item.produto.preco === 'number' ? 
+                                       item.produto.preco.toFixed(2) : 
+                                       item.produto.preco.toString(),
+                                image: item.produto.foto,
+                                category: item.produto.categoria || 'Outros',
+                                tags: item.produto.tags || []
+                            };
+                            
+                            console.log('Produto formatado:', product);
+
+                            try {
+                                await saveToAPI(product);
+                                console.log('Produto salvo:', product.name);
+                            } catch (error) {
+                                console.error('Erro ao salvar produto:', error);
                             }
                         }
 
-                        try {
-                            const saveResponse = await fetch(`${MASTER_URL}/api/products`, {
-                                method: 'POST',
-                                body: formData
-                            });
-
-                            if (!saveResponse.ok) throw new Error('Failed to save product');
-                            console.log('Product saved successfully');
-                        } catch (error) {
-                            console.error('Error saving product:', error);
-                        }
+                        // Esconder indicador de carregamento
+                        document.getElementById('loading').style.display = 'none';
+                        alert('Produtos importados com sucesso!');
+                        window.location.href = 'product-list.html';
+                    } catch (error) {
+                        document.getElementById('loading').style.display = 'none';
+                        console.error('Erro ao processar arquivo:', error);
+                        alert('Erro ao processar arquivo: ' + error.message);
                     }
+                };
 
-                    document.getElementById('loading').style.display = 'none';
-                    alert('Produtos importados com sucesso!');
-                    window.location.href = 'product-list.html';
-                } catch (error) {
-                    document.getElementById('loading').style.display = 'none';
-                    console.error('Error processing file:', error);
-                    alert('Erro ao processar arquivo: ' + error.message);
-                }
-            };
-
-            reader.readAsText(file);
+                reader.readAsText(fileInput.files[0]);
+            } else {
+                alert('Por favor, selecione um arquivo');
+            }
         }
 
         async function loadCategories() {
