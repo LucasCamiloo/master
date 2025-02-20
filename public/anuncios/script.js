@@ -79,35 +79,32 @@ async function initializeApp() {
 // Single definition of loadExistingProducts and related functions
 async function loadProductsModal() {
     try {
+        const grid = document.getElementById('productsGridModal');
+        if (!grid) {
+            console.error('Products grid not found');
+            return;
+        }
+
+        // Show loading state
+        grid.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
+
         const response = await fetch(`${MASTER_URL}/api/products`);
         if (!response.ok) throw new Error('Failed to fetch products');
         
         const data = await response.json();
-        if (!data.success) throw new Error('Invalid product data');
+        if (!data.success || !data.products) throw new Error('Invalid product data');
 
         window.allProducts = data.products;
+        console.log('Loaded products:', data.products.length); // Debug log
 
-        // Update grid
-        const grid = document.getElementById('productsGridModal');
-        if (!grid) return;
-
-        grid.innerHTML = data.products.map(product => `
-            <div class="product-card ${window.selectedProducts.some(p => p.id === product.id) ? 'selected' : ''}"
-                 onclick="toggleProductSelection('${product.id}')">
-                <img src="${product.imageUrl || '/default-product.png'}" alt="${product.name}">
-                <div class="product-name">${product.name}</div>
-                <div class="product-price">${product.price}</div>
-            </div>
-        `).join('');
-
+        renderProductsGrid(data.products);
         updateSelectedProductsPreview();
     } catch (error) {
         console.error('Error loading products:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to load products'
-        });
+        const grid = document.getElementById('productsGridModal');
+        if (grid) {
+            grid.innerHTML = '<div class="alert alert-danger">Error loading products</div>';
+        }
     }
 }
 
@@ -2172,60 +2169,72 @@ let categories = [];
 // Função para carregar produtos no modal
 async function loadProductsModal() {
     try {
-        const [productsResponse, categoriesResponse] = await Promise.all([
-            fetch(`${MASTER_URL}/api/products`),
-            fetch(`${MASTER_URL}/api/categories`)
-        ]);
-
-        if (!productsResponse.ok || !categoriesResponse.ok) {
-            throw new Error('Falha ao carregar dados');
+        const grid = document.getElementById('productsGridModal');
+        if (!grid) {
+            console.error('Products grid not found');
+            return;
         }
 
-        const productsData = await productsResponse.json();
-        const categoriesData = await categoriesResponse.json();
+        // Show loading state
+        grid.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
 
-        allProducts = productsData.products;
-        categories = categoriesData.categories;
+        const response = await fetch(`${MASTER_URL}/api/products`);
+        if (!response.ok) throw new Error('Failed to fetch products');
+        
+        const data = await response.json();
+        if (!data.success || !data.products) throw new Error('Invalid product data');
 
-        // Preencher select de categorias
-        const categorySelect = document.getElementById('categoryFilterModal');
-        categorySelect.innerHTML = '<option value="">Todas as categorias</option>' +
-            categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        window.allProducts = data.products;
+        console.log('Loaded products:', data.products.length); // Debug log
 
-        renderProductsGrid();
+        renderProductsGrid(data.products);
+        updateSelectedProductsPreview();
     } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Erro',
-            text: 'Falha ao carregar produtos'
-        });
+        console.error('Error loading products:', error);
+        const grid = document.getElementById('productsGridModal');
+        if (grid) {
+            grid.innerHTML = '<div class="alert alert-danger">Error loading products</div>';
+        }
     }
 }
 
 // Função para renderizar grid de produtos
-function renderProductsGrid() {
+function renderProductsGrid(products) {
     const grid = document.getElementById('productsGridModal');
-    const searchTerm = document.getElementById('productSearchModal').value.toLowerCase();
-    const selectedCategory = document.getElementById('categoryFilterModal').value;
+    if (!grid) return;
 
-    const filteredProducts = allProducts.filter(product => {
+    const searchTerm = document.getElementById('productSearchModal')?.value?.toLowerCase() || '';
+    const selectedCategory = document.getElementById('categoryFilterModal')?.value || '';
+
+    const filteredProducts = products.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
-                            product.description.toLowerCase().includes(searchTerm);
+                            (product.description || '').toLowerCase().includes(searchTerm);
         const matchesCategory = !selectedCategory || product.category === selectedCategory;
         return matchesSearch && matchesCategory;
     });
 
-    grid.innerHTML = filteredProducts.map(product => `
-        <div class="product-card ${selectedProducts.some(p => p.id === product.id) ? 'selected' : ''}"
-             onclick="toggleProductSelection('${product.id}')">
-            <img src="${product.imageUrl || '/default-product.png'}" alt="${product.name}">
-            <div class="product-name">${product.name}</div>
-            <div class="product-price">${product.price}</div>
-        </div>
-    `).join('');
+    console.log('Rendering products:', filteredProducts.length); // Debug log
 
-    updateSelectedProductsPreview();
+    grid.innerHTML = `
+        <div class="products-grid">
+            ${filteredProducts.map(product => `
+                <div class="product-card ${window.selectedProducts.some(p => p.id === product.id) ? 'selected' : ''}"
+                     onclick="toggleProductSelection('${product.id}')">
+                    <img src="${product.imageUrl || '/default-product.png'}" 
+                         alt="${product.name}"
+                         onerror="this.src='${MASTER_URL}/default-product.png'">
+                    <div class="product-info">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-price">${product.price}</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+     if (filteredProducts.length === 0) {
+        grid.innerHTML = '<div class="alert alert-info">No products found</div>';
+    }
 }
 
 // Função para alternar seleção de produto
