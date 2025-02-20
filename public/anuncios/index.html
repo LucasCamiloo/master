@@ -392,54 +392,84 @@
         </div>
 
         <div id="twoProductsSection">
-            <div class="form-section">
-                <div class="product-section" data-product-number="1">
-                    <div class="product-header" onclick="toggleProduct(1)">
-                        <h4>Produto 1</h4>
-                        <i class="bi bi-chevron-down toggle-icon" id="toggle-icon-1"></i>
-                    </div>
-                    <div class="product-content" id="product-content-1">
-                        <label for="product1Search" class="control-label">Pesquisar Produto 1</label>
-                        <input type="text" id="product1Search" class="form-control" oninput="filterProducts(1)">
-                        <label for="product1Select" class="form-label mt-2">Selecione o Produto 1</label>
-                        <select id="product1Select" class="form-select" onchange="selectExistingProduct(this.value, 1)">
-                          <option value="">Selecione um produto</option>
-                        </select>
-                        <label for="product1Title" class="form-label mt-2">Título do Produto 1</label>
-                        <input type="text" id="product1Title" class="form-control">
-                        <label for="product1Description" class="form-label mt-2">Descrição do Produto 1</label>
-                        <textarea id="product1Description" class="form-control" rows="2"></textarea>
-                        <label for="product1Price" class="form-label mt-2">Preço do Produto 1</label>
-                        <input type="text" id="product1Price" class="form-control">
-                        <label for="product1Image" class="form-label mt-2">Imagem do Produto 1</label>
-                        <input type="file" id="product1Image" class="form-control" data-imageUrl="">
+    <div class="form-section">
+        <h4>Seleção de Produtos</h4>
+        <button type="button" class="btn btn-primary w-100 mb-3" data-bs-toggle="modal" data-bs-target="#productSelectionModal">
+            <i class="bi bi-box-seam"></i> Selecionar Produtos
+        </button>
+
+        <!-- Preview dos produtos selecionados -->
+        <div class="selected-products-preview mb-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="selected-product-card" id="product1Preview">
+                        <div class="text-center mb-3">
+                            <img src="/default-product.png" alt="Produto 1" class="product-preview-img">
+                        </div>
+                        <h5 class="product-preview-title" id="product1Title">Produto 1 não selecionado</h5>
+                        <p class="product-preview-price" id="product1Price">R$ 0,00</p>
                     </div>
                 </div>
-
-                <div class="product-section" data-product-number="2">
-                    <div class="product-header" onclick="toggleProduct(2)">
-                        <h4>Produto 2</h4>
-                        <i class="bi bi-chevron-down toggle-icon" id="toggle-icon-2"></i>
-                    </div>
-                    <div class="product-content" id="product-content-2">
-                        <label for="product2Search" class="control-label">Pesquisar Produto 2</label>
-                        <input type="text" id="product2Search" class="form-control" oninput="filterProducts(2)">
-                        <label for="product2Select" class="form-label mt-2">Selecione o Produto 2</label>
-                        <select id="product2Select" class="form-select" onchange="selectExistingProduct(this.value, 2)">
-                          <option value="">Selecione um produto</option>
-                        </select>
-                        <label for="product2Title" class="form-label mt-2">Título do Produto 2</label>
-                        <input type="text" id="product2Title" class="form-control">
-                        <label for="product2Description" class="form-label mt-2">Descrição do Produto 2</label>
-                        <textarea id="product2Description" class="form-control" rows="2"></textarea>
-                        <label for="product2Price" class="form-label mt-2">Preço do Produto 2</label>
-                        <input type="text" id="product2Price" class="form-control">
-                        <label for="product2Image" class="form-label mt-2">Imagem do Produto 2</label>
-                        <input type="file" id="product2Image" class="form-control" data-imageUrl="">
+                <div class="col-md-6">
+                    <div class="selected-product-card" id="product2Preview">
+                        <div class="text-center mb-3">
+                            <img src="/default-product.png" alt="Produto 2" class="product-preview-img">
+                        </div>
+                        <h5 class="product-preview-title" id="product2Title">Produto 2 não selecionado</h5>
+                        <p class="product-preview-price" id="product2Price">R$ 0,00</p>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Modal de seleção de produtos (atualizado) -->
+<div class="modal fade" id="productSelectionModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Selecionar Produtos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Barra de pesquisa e filtros -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" id="productSearchModal" class="form-control" placeholder="Buscar produtos...">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <select id="categoryFilterModal" class="form-select">
+                            <option value="">Todas as categorias</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Grid de produtos -->
+                <div class="products-grid mb-4" id="productsGridModal">
+                    <!-- Produtos serão carregados aqui -->
+                </div>
+
+                <!-- Preview dos selecionados -->
+                <div class="selected-products-preview">
+                    <h6>Produtos Selecionados:</h6>
+                    <div id="selectedProductsPreview" class="d-flex flex-wrap gap-3">
+                        <!-- Produtos selecionados serão mostrados aqui -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmProductSelection">Confirmar Seleção</button>
+            </div>
+        </div>
+    </div>
+</div>
 
         <!-- Atualizar a seção de lista de produtos -->
         <div id="productListSection" class="form-section" style="display: none;">
