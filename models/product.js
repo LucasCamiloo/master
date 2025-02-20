@@ -26,7 +26,11 @@ const productSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true,
-        default: 'Outros' // Adiciona uma categoria padrão
+        default: 'Outros'
+    },
+    tags: {
+        type: [String],
+        default: []
     }
 }, { 
     timestamps: true,
