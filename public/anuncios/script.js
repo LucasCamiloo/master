@@ -2477,17 +2477,23 @@ window.toggleProductSelection = function(product) {
     
     if (index > -1) {
         window.selectedProducts.splice(index, 1);
-        if (card) card.classList.remove('selected');
-    } else if (window.selectedProducts.length < 2) {
-        window.selectedProducts.push(product);
-        if (card) card.classList.add('selected');
+        card.classList.remove('selected');
     } else {
-        alert('Você só pode selecionar 2 produtos!');
-        return;
+        if (window.selectedProducts.length < 2) {
+            window.selectedProducts.push(product);
+            card.classList.add('selected');
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Limite atingido',
+                text: 'Você só pode selecionar até 2 produtos'
+            });
+        }
     }
     updateSelectedProductsPreview(); 
-    updateSelectedCount(); // Essa função parece estar atualizando apenas o contador
+    updateSelectedCount();
 };
+
 function updateSelectedProductsPreview() {
     const container = document.getElementById('selectedProducts');
     container.innerHTML = window.selectedProducts.map(product => `
@@ -2746,4 +2752,3 @@ async function loadModalProducts() {
     }
 }
 
-// ...
