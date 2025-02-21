@@ -1,5 +1,9 @@
 const MASTER_URL = 'https://master-teste.vercel.app';
 
+function getElement(id) {
+    return document.getElementById(id);
+}
+
 // Inicializar variáveis globais
 window.selectedProducts = [];
 window.ads = [];
@@ -116,6 +120,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const saveAdButton = getElement('saveAd');
         const backgroundSelect = getElement('backgroundSelect');
         const searchByCategory = getElement('searchByCategory');
+        const confirmSelectionBtn = getElement('confirmSelection');
 
         if (addAdButton) {
             addAdButton.addEventListener('click', handleAddAd);
@@ -127,6 +132,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (searchByCategory) {
             searchByCategory.addEventListener('input', handleCategorySearch);
+        }
+
+        if (confirmSelectionBtn) {
+            confirmSelectionBtn.addEventListener('click', confirmProductSelection);
         }
 
         // Load initial data
@@ -1497,7 +1506,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             productListSection.style.display = "block";
             backgroundSelect.closest('.form-section').style.display = "block";
             updateBackgroundOptions("productList");
-            loadProductsForSelection();
+            loadProductsForSelection(); // Carregar produtos quando alternar para esta view
         } else if (adType === "video") {
             videoSection.style.display = "block";
             backgroundSelect.closest('.form-section').style.display = "none";
@@ -1600,7 +1609,7 @@ window.toggleAdType = function(adType) {
             productListSection.style.display = "block";
             backgroundSelect.closest('.form-section').style.display = "block";
             updateBackgroundOptions("productList");
-            loadProductsForSelection(); // Carregar produtos quando alternar para esta view
+            loadProductsForSelection(); // Use window.loadProductsForSelection
             break;
         case "video":
             videoSection.style.display = "block";
