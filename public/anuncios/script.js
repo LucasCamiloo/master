@@ -2656,7 +2656,7 @@ async function loadModalProducts() {
                     ${products.map(product => `
                         <div class="col-md-3 col-sm-6">
                             <div class="card h-100 product-card" 
-                                 onclick="toggleProductSelection(${JSON.stringify(product)})"
+                                 onclick="toggleProductSelection(${JSON.stringify(product).replace(/"/g, '&quot;')})"
                                  data-product-id="${product.id}">
                                 <div class="selected-badge">Selecionado</div>
                                 <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
@@ -2887,6 +2887,140 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         await loadModalProducts();
         loadSavedAds();
+    } catch (error) {
+        console.error('Error during initialization:', error);
+    }
+});
+
+// ...existing code...
+
+// Adicionar função handleSaveAd que estava faltando
+async function handleSaveAd() {
+    const title = document.getElementById('adTitleModal')?.value;
+    if (!title) {
+        alert('Por favor, digite um título para o anúncio');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${MASTER_URL}/api/ads`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                title: title,
+                content: window.ads
+            })
+        });
+
+        if (!response.ok) throw new Error('Falha ao salvar anúncio');
+
+        const data = await response.json();
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: 'Anúncio salvo com sucesso!'
+            });
+            loadSavedAds();
+            closeAndClearModal();
+        }
+    } catch (error) {
+        console.error('Erro ao salvar anúncio:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Erro ao salvar anúncio: ' + error.message
+        });
+    }
+}
+
+// Atualizar a função loadModalProducts para usar o container correto
+async function loadModalProducts() {
+    try {
+        const response = await fetch(`${MASTER_URL}/api/products`);
+        const data = await response.json();
+        
+        if (!data.success) throw new Error('Failed to load products');
+
+        // Usar o container correto do modal
+        const container = document.querySelector('.modal-body .container-fluid');
+        if (!container) throw new Error('Container not found');
+
+        // Limpar conteúdo existente
+        container.innerHTML = '';
+
+        // Agrupar produtos por categoria
+        const productsByCategory = data.products.reduce((acc, product) => {
+            const category = product.category || 'Sem categoria';
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(product);
+            return acc;
+        }, {});
+
+        // Renderizar produtos por categoria
+        Object.entries(productsByCategory).forEach(([category, products]) => {
+            const categorySection = document.createElement('div');
+            categorySection.className = 'category-section mb-4';
+            categorySection.innerHTML = `
+                <h5 class="mb-3">${category}</h5>
+                <div class="row g-3">
+                    ${products.map(product => `
+                        <div class="col-md-3 col-sm-6">
+                            <div class="card h-100 product-card ${window.selectedProducts?.find(p => p.id === product.id) ? 'selected' : ''}"
+                                 onclick="toggleProductSelection(${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                                <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
+                                     class="card-img-top p-2" alt="${product.name}"
+                                     onerror="this.src='${MASTER_URL}/default-product.png'">
+                                <div class="card-body">
+                                    <h6 class="card-title">${product.name}</h6>
+                                    <p class="card-text text-primary mb-0">${product.price}</p>
+                                </div>
+                                <div class="selected-badge">
+                                    <i class="bi bi-check-circle"></i> Selecionado
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            container.appendChild(categorySection);
+        });
+
+        // Atualizar contador
+        updateSelectedCount();
+
+    } catch (error) {
+        console.error('Error loading products:', error);
+        const container = document.querySelector('.modal-body .container-fluid');
+        if (container) {
+            container.innerHTML = '<div class="alert alert-danger">Erro ao carregar produtos</div>';
+        }
+    }
+}
+
+// Atualizar função de inicialização
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const addAdButton = document.getElementById('addAd');
+        const saveAdButton = document.getElementById('saveAd');
+        
+        if (addAdButton) {
+            addAdButton.addEventListener('click', handleAddAd);
+        }
+        
+        if (saveAdButton) {
+            saveAdButton.addEventListener('click', handleSaveAd);
+        }
+
+        // Remover chamada de toggleProduct aqui
+        // Inicializar tipo de anúncio padrão
+        toggleAdType('twoProducts');
+        
+        // Carregar dados iniciais
+        await loadModalProducts();
+        await loadSavedAds();
     } catch (error) {
         console.error('Error during initialization:', error);
     }
