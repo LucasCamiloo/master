@@ -1560,21 +1560,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     toggleProduct(1);
 });
 
-// Atualizar a função toggleProduct
-function toggleProduct(number) {
-    const content = document.getElementById(`product-content-${number}`);
-    const icon = document.getElementById(`toggle-icon-${number}`);
-    const allContents = document.querySelectorAll('.product-content');
-    const allIcons = document.querySelectorAll('.toggle-icon');
-    
-    // Primeiro, fecha todos os produtos
-    allContents.forEach(el => el.style.display = 'none');
-    allIcons.forEach(el => el.classList.remove('expanded'));
-    
-    // Depois, abre apenas o produto clicado
-    content.style.display = 'block';
-    icon.classList.add('expanded');
-}
 
 // Atualizar a função toggleAdType
 window.toggleAdType = function(adType) {
@@ -3026,5 +3011,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
+// ...existing code...
+
+
+// Wrap event listeners with checks:
+document.addEventListener('DOMContentLoaded', () => {
+    const confirmBtn = document.getElementById('confirmSelection');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', () => {
+            // ...existing code...
+        });
+    }
+    const searchCat = document.getElementById('searchByCategory');
+    if (searchCat) {
+        searchCat.addEventListener('input', loadModalProducts);
+    }
+    // ...existing code...
+});
+
+async function loadExistingProducts() {
+    const container = document.getElementById('productsListContainer');
+    if (!container) {
+        console.error('productsListContainer element not found');
+        return;
+    }
+    // ...existing code...
+}
+
+// Remove any duplicate toggleProduct or loadExistingProducts definitions
 // ...existing code...
 
