@@ -580,9 +580,9 @@
     </div>
   </div>
 
-<!-- Replace the old product selection modal with this new one -->
+<!-- Update product selection modal structure -->
 <div class="modal fade" id="productSelectionModal" tabindex="-1">
-    <div class="modal-dialog modal-fullscreen">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Selecionar Produtos</h5>
@@ -592,35 +592,31 @@
                 </div>
             </div>
             
-            <div class="modal-body p-0">
-                <!-- Search and Category Filter -->
-                <div class="sticky-top bg-white p-3 border-bottom">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <input type="text" class="form-control" id="productSearchInput" 
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="productSearchInput" 
                                    placeholder="Pesquisar produtos...">
                         </div>
-                        <div class="col-md-6">
+                        <div class="col">
                             <select class="form-select" id="categoryFilter">
                                 <option value="">Todas as categorias</option>
                             </select>
                         </div>
                     </div>
-                </div>
-
-                <!-- Products Grid -->
-                <div class="container-fluid py-3">
+                    
                     <div id="categorizedProducts">
-                        <!-- Categories and products will be loaded here -->
+                        <!-- Products will be loaded here -->
                     </div>
                 </div>
             </div>
 
-            <!-- Sticky Footer -->
-            <div class="modal-footer sticky-bottom bg-white border-top">
+            <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="confirmProductSelection()" 
-                        id="confirmSelectionBtn" disabled>
+                <button type="button" class="btn btn-primary" id="confirmSelectionBtn" onclick="confirmProductSelection()">
                     Confirmar Seleção
                 </button>
             </div>
