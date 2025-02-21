@@ -2743,3 +2743,154 @@ window.toggleProductSelection = function(product) {
 
 // ...existing code...
 
+// Adicionar a função handleAddAd que estava faltando
+async function handleAddAd() {
+    const adType = document.querySelector('.ad-type-button.active').getAttribute('data-ad-type');
+    const backgroundClass = document.getElementById("backgroundSelect").value;
+    
+    if ((adType === "twoProducts" && !backgroundClass.startsWith('twoProducts')) ||
+        (adType === "productList" && !backgroundClass.startsWith('list'))) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Fundo inválido',
+            text: 'Por favor, selecione um fundo apropriado para o tipo de anúncio.'
+        });
+        return;
+    }
+
+    let adHTML = null;
+
+    try {
+        if (adType === "twoProducts") {
+            if (window.selectedProducts.length !== 2) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Seleção incompleta',
+                    text: 'Por favor, selecione exatamente 2 produtos.'
+                });
+                return;
+            }
+            
+            const [product1, product2] = window.selectedProducts;
+            adHTML = generateAdHTML(product1, product2, product1.imageUrl, product2.imageUrl, backgroundClass);
+        } else if (adType === "productList") {
+            adHTML = await generateListAdHTML(backgroundClass);
+        } else if (adType === "video") {
+            const videoUrl = document.getElementById("videoUrl").value.trim();
+            if (!videoUrl) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'URL não informada',
+                    text: 'Por favor, insira a URL do vídeo.'
+                });
+                return;
+            }
+            
+            adHTML = generateVideoAdHTML(videoUrl);
+            document.getElementById("videoUrl").value = '';
+        }
+
+        if (adHTML) {
+            window.ads.push(adHTML);
+            window.currentSlide = window.ads.length - 1;
+            updatePreview();
+            Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: 'Anúncio adicionado!'
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao adicionar anúncio:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Ocorreu um erro ao adicionar o anúncio.'
+        });
+    }
+}
+
+// Atualizar a função loadModalProducts
+async function loadModalProducts() {
+    try {
+        const response = await fetch(`${MASTER_URL}/api/products`);
+        const data = await response.json();
+        
+        if (!data.success) throw new Error('Failed to load products');
+
+        const container = document.getElementById('categorizedProducts');
+        if (!container) throw new Error('Container not found');
+
+        // Group products by category
+        const productsByCategory = data.products.reduce((acc, product) => {
+            const category = product.category || 'Sem categoria';
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(product);
+            return acc;
+        }, {});
+
+        // Update category filter
+        const categoryFilter = document.getElementById('categoryFilter');
+        if (categoryFilter) {
+            categoryFilter.innerHTML = '<option value="">Todas as categorias</option>' + 
+                Object.keys(productsByCategory).map(category => 
+                    `<option value="${category}">${category}</option>`
+                ).join('');
+        }
+
+        // Render products by category
+        container.innerHTML = Object.entries(productsByCategory).map(([category, products]) => `
+            <div class="category-section" data-category="${category}">
+                <div class="category-header">
+                    <h5 class="mb-0">${category}</h5>
+                </div>
+                <div class="row g-3">
+                    ${products.map(product => `
+                        <div class="col-md-3 col-sm-6">
+                            <div class="card h-100 product-card ${window.selectedProducts?.find(p => p.id === product.id) ? 'selected' : ''}" 
+                                 onclick="toggleProductSelection(${JSON.stringify(product).replace(/"/g, '&quot;')})"
+                                 data-product-id="${product.id}">
+                                <div class="selected-badge">Selecionado</div>
+                                <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
+                                     class="card-img-top p-2" alt="${product.name}">
+                                <div class="card-body">
+                                    <h6 class="card-title">${product.name}</h6>
+                                    <p class="card-text text-primary mb-0">${product.price}</p>
+                                    <small class="text-muted">${category}</small>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+
+        // Initialize search and filter functionality
+        initializeProductFilters();
+        
+    } catch (error) {
+        console.error('Error loading products:', error);
+        const container = document.getElementById('categorizedProducts');
+        if (container) {
+            container.innerHTML = '<div class="alert alert-danger">Erro ao carregar produtos</div>';
+        }
+    }
+}
+
+// Atualizar o event listener do DOMContentLoaded
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const addAdButton = document.getElementById('addAd');
+        if (addAdButton) {
+            addAdButton.addEventListener('click', handleAddAd);
+        }
+
+        await loadModalProducts();
+        loadSavedAds();
+    } catch (error) {
+        console.error('Error during initialization:', error);
+    }
+});
+
+// ...existing code...
+
