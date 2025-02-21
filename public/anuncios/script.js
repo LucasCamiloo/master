@@ -2640,7 +2640,7 @@ async function loadModalProducts() {
                 <div class="row g-3">
                     ${products.map(product => `
                         <div class="col-md-3 col-sm-6">
-                            <div class="card h-100 product-card" 
+                            <div class="card h-100 product-card ${selectedProducts.find(p => p.id === product.id) ? 'selected' : ''}" 
                                  onclick="toggleProductSelection(${JSON.stringify(product).replace(/"/g, '&quot;')})"
                                  data-product-id="${product.id}">
                                 <div class="selected-badge">Selecionado</div>
