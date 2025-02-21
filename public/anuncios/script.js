@@ -1,13 +1,56 @@
 const MASTER_URL = 'https://master-teste.vercel.app';
 
-// Global variable for selected products
+// Inicializar variáveis globais
 window.selectedProducts = [];
+window.ads = [];
+window.currentSlide = 0;
 
 function updateSelectedCount() {
     const countElement = document.getElementById('selectedCount');
     if (countElement) {
         countElement.textContent = window.selectedProducts.length;
     }
+}
+
+window.toggleProductSelection = function(product) {
+    const index = window.selectedProducts.findIndex(p => p.id === product.id);
+    const productCards = document.querySelectorAll(`.card[onclick*="${JSON.stringify(product).replace(/"/g, '&quot;')}"]`);
+    
+    if (index > -1) {
+        window.selectedProducts.splice(index, 1);
+        productCards.forEach(card => card.classList.remove('selected'));
+    } else if (window.selectedProducts.length < 2) {
+        window.selectedProducts.push(product);
+        productCards.forEach(card => card.classList.add('selected'));
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Limite atingido',
+            text: 'Você só pode selecionar até 2 produtos'
+        });
+        return;
+    }
+
+    updateSelectedCount();
+    updateSelectedProductsPreview();
+};
+
+function updateSelectedProductsPreview() {
+    const container = document.getElementById('selectedProducts');
+    if (!container) return;
+
+    container.innerHTML = window.selectedProducts.map(product => `
+        <div class="col-6">
+            <div class="card mb-3">
+                <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
+                     class="card-img-top p-2" alt="${product.name}">
+                <div class="card-body">
+                    <h6>${product.name}</h6>
+                    <p>${product.price}</p>
+                </div>
+            </div>
+        </div>
+    `).join('');
 }
 
 window.confirmProductSelection = function() {
@@ -19,75 +62,40 @@ window.confirmProductSelection = function() {
         });
         return;
     }
- const container = document.getElementById('selectedProducts');
-    if (!container) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Erro técnico',
-            text: 'Elemento de exibição não encontrado'
-        });
-        return;
-    }
 
     const [product1, product2] = window.selectedProducts;
     
-    // Update form fields with selected products
-    document.getElementById('product1Title').value = product1.name || '';
-    document.getElementById('product1Description').value = product1.description || '';
-    document.getElementById('product1Price').value = product1.price || '';
-    if (document.getElementById('product1Image')) {
-        document.getElementById('product1Image').dataset.imageUrl = product1.imageUrl || '';
-    }
+    // Update form fields
+    const fields = {
+        'product1Title': product1.name,
+        'product1Description': product1.description,
+        'product1Price': product1.price,
+        'product2Title': product2.name,
+        'product2Description': product2.description,
+        'product2Price': product2.price
+    };
 
-    document.getElementById('product2Title').value = product2.name || '';
-    document.getElementById('product2Description').value = product2.description || '';
-    document.getElementById('product2Price').value = product2.price || '';
-    if (document.getElementById('product2Image')) {
-        document.getElementById('product2Image').dataset.imageUrl = product2.imageUrl || '';
-    }
+    Object.entries(fields).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) element.value = value || '';
+    });
 
-    // Update preview
-    const selectedProductsDiv = document.getElementById('selectedProducts');
-    if (selectedProductsDiv) {
-        selectedProductsDiv.innerHTML = `
-            <div class="row">
-                <div class="col-6">
-                    <div class="card mb-3">
-                        <img src="${product1.imageUrl || `${MASTER_URL}/default-product.png`}" 
-                             class="card-img-top p-2" alt="${product1.name}">
-                        <div class="card-body">
-                            <h6 class="card-title">${product1.name}</h6>
-                            <p class="card-text text-primary">${product1.price}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="card mb-3">
-                        <img src="${product2.imageUrl || `${MASTER_URL}/default-product.png`}" 
-                             class="card-img-top p-2" alt="${product2.name}">
-                        <div class="card-body">
-                            <h6 class="card-title">${product2.name}</h6>
-                            <p class="card-text text-primary">${product2.price}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
+    ['product1Image', 'product2Image'].forEach((id, index) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.dataset.imageUrl = window.selectedProducts[index].imageUrl || '';
+        }
+    });
 
-    // Close modal
     const modal = bootstrap.Modal.getInstance(document.getElementById('productSelectionModal'));
-    if (modal) {
-        modal.hide();
-    }
+    if (modal) modal.hide();
 };
 
-// Update loadModalProducts function
 async function loadModalProducts() {
-    try {
-        const productsContainer = document.getElementById('productsListContainer');
-        if (!productsContainer) return;
+    const productsContainer = document.getElementById('productsListContainer');
+    if (!productsContainer) return;
 
+    try {
         productsContainer.innerHTML = '<div class="text-center">Carregando produtos...</div>';
 
         const response = await fetch(`${MASTER_URL}/api/products`);
@@ -98,8 +106,7 @@ async function loadModalProducts() {
                 <div class="row g-3">
                     ${data.products.map(product => `
                         <div class="col-md-3">
-                            <div class="card h-100 ${window.selectedProducts.find(p => p._id === product._id) ? 'selected' : ''}"
-                                 data-product-id="${product._id}"
+                            <div class="card h-100 ${window.selectedProducts.find(p => p.id === product.id) ? 'selected' : ''}"
                                  onclick="toggleProductSelection(${JSON.stringify(product).replace(/"/g, '&quot;')})">
                                 <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
                                      class="card-img-top p-2" alt="${product.name}">
@@ -113,9 +120,6 @@ async function loadModalProducts() {
                 </div>
             `;
         }
-
-        updateSelectedCount();
-        
     } catch (error) {
         console.error('Erro ao carregar produtos:', error);
         if (productsContainer) {
@@ -124,80 +128,17 @@ async function loadModalProducts() {
     }
 }
 
-// Update openProductSelectionModal function
 window.openProductSelectionModal = async function() {
-    window.selectedProducts = []; // Reset selection
-    const modal = new bootstrap.Modal(document.getElementById('productSelectionModal'));
+    const modalElement = document.getElementById('productSelectionModal');
+    if (!modalElement) return;
+
+    selectedProducts = []; // Reset selection
+    const modal = new bootstrap.Modal(modalElement);
     await loadModalProducts();
     updateSelectedCount();
     modal.show();
 };
 
-// Initialize empty arrays and variables
-window.ads = [];
-window.currentSlide = 0;
-window.selectedProducts = [];
-
-// Add safe DOM manipulation helper
-function getElement(id) {
-    const element = document.getElementById(id);
-    if (!element) {
-        console.warn(`Element with id "${id}" not found`);
-    }
-    return element;
-}
-
-// Update toggleProduct function with null checks
-function toggleProduct(number) {
-    const content = getElement(`product-content-${number}`);
-    const icon = getElement(`toggle-icon-${number}`);
-    
-    if (!content || !icon) {
-        console.warn('Required elements for toggleProduct not found');
-        return;
-    }
-    
-    content.style.display = content.style.display === 'block' ? 'none' : 'block';
-    icon.classList.toggle('expanded');
-}
-
-// Add missing handler functions at the top
-const handleAddAd = async () => {
-    const adType = document.querySelector('.ad-type-button.active').getAttribute('data-ad-type');
-    const backgroundSelect = document.getElementById("backgroundSelect");
-    
-    if (!backgroundSelect) {
-        console.error('Background select not found');
-        return;
-    }
-
-    const backgroundClass = backgroundSelect.value;
-    
-    if ((adType === "twoProducts" && !backgroundClass.startsWith('twoProducts')) ||
-        (adType === "productList" && !backgroundClass.startsWith('list'))) {
-        alert("Por favor, selecione um fundo apropriado para o tipo de anúncio.");
-        return;
-    }
-
-    // Rest of your addAd logic
-    // ...existing code...
-};
-
-const handleCategorySearch = (e) => {
-    const searchTerm = e.target.value.toLowerCase();
-    document.querySelectorAll('.product-card').forEach(card => {
-        const productName = card.querySelector('.card-title').textContent.toLowerCase();
-        const shouldShow = productName.includes(searchTerm);
-        card.closest('.col-md-3').style.display = shouldShow ? '' : 'none';
-    });
-};
-
-const handleSaveAd = () => {
-    // Your existing save ad logic
-    // ...existing code...
-};
-
-// Update event listener initialization
 document.addEventListener("DOMContentLoaded", async () => {
     try {
         // Initialize product selection elements
