@@ -3,8 +3,6 @@ const MASTER_URL = 'https://master-teste.vercel.app';
 // Global variable for selected products
 window.selectedProducts = [];
 
-
-
 function updateSelectedCount() {
     const countElement = document.getElementById('selectedCount');
     if (countElement) {
@@ -2751,4 +2749,154 @@ async function loadModalProducts() {
         productsContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar produtos</div>';
     }
 }
+
+window.selectedProducts = [];
+
+window.toggleProductSelection = function(product) {
+    // Find product in selection array
+    const index = selectedProducts.findIndex(p => p.id === product.id);
+    
+    // Find the card element
+    const card = document.querySelector(`.card[onclick*="${product.id}"]`);
+    
+    if (index > -1) {
+        // Remove if already selected
+        selectedProducts.splice(index, 1);
+        if (card) card.classList.remove('selected');
+    } else if (selectedProducts.length < 2) {
+        // Add if less than 2 products selected
+        selectedProducts.push(product);
+        if (card) card.classList.add('selected');
+    } else {
+        // Show error if trying to select more than 2
+        Swal.fire({
+            icon: 'error',
+            title: 'Limite atingido',
+            text: 'Você só pode selecionar até 2 produtos'
+        });
+        return;
+    }
+
+    // Update UI
+    updateSelectedCount();
+    updateSelectedPreview();
+};
+
+function updateSelectedCount() {
+    const countElement = document.getElementById('selectedCount');
+    if (countElement) {
+        countElement.textContent = selectedProducts.length;
+    }
+}
+
+function updateSelectedPreview() {
+    const container = document.getElementById('selectedProducts');
+    if (!container) return;
+
+    container.innerHTML = selectedProducts.map(product => `
+        <div class="col-6">
+            <div class="card mb-3">
+                <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
+                     class="card-img-top p-2" alt="${product.name}">
+                <div class="card-body">
+                    <h6 class="card-title">${product.name}</h6>
+                    <p class="card-text text-primary">${product.price}</p>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+window.confirmProductSelection = function() {
+    if (selectedProducts.length !== 2) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Seleção incompleta',
+            text: 'Por favor selecione exatamente 2 produtos'
+        });
+        return;
+    }
+
+    const [product1, product2] = selectedProducts;
+    
+    // Update form fields
+    const fields = {
+        'product1Title': product1.name,
+        'product1Description': product1.description,
+        'product1Price': product1.price,
+        'product2Title': product2.name,
+        'product2Description': product2.description,
+        'product2Price': product2.price
+    };
+
+    // Set all field values
+    Object.entries(fields).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) element.value = value || '';
+    });
+
+    // Set image URLs
+    ['product1Image', 'product2Image'].forEach((id, index) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.dataset.imageUrl = selectedProducts[index].imageUrl || '';
+        }
+    });
+
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('productSelectionModal'));
+    if (modal) {
+        modal.hide();
+    }
+};
+
+// Update the modal products loading function
+async function loadModalProducts() {
+    try {
+        const productsContainer = document.getElementById('productsListContainer');
+        if (!productsContainer) return;
+
+        productsContainer.innerHTML = '<div class="text-center">Carregando produtos...</div>';
+
+        const response = await fetch(`${MASTER_URL}/api/products`);
+        const data = await response.json();
+        
+        if (data.success) {
+            productsContainer.innerHTML = `
+                <div class="row g-3">
+                    ${data.products.map(product => `
+                        <div class="col-md-3">
+                            <div class="card h-100 ${selectedProducts.find(p => p.id === product.id) ? 'selected' : ''}"
+                                 onclick="toggleProductSelection(${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                                <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
+                                     class="card-img-top p-2" alt="${product.name}">
+                                <div class="card-body">
+                                    <h6 class="card-title">${product.name}</h6>
+                                    <p class="card-text text-primary">${product.price}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+        if (productsContainer) {
+            productsContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar produtos</div>';
+        }
+    }
+}
+
+// Update the modal open function
+window.openProductSelectionModal = async function() {
+    const modalElement = document.getElementById('productSelectionModal');
+    if (!modalElement) return;
+
+    selectedProducts = []; // Reset selection
+    const modal = new bootstrap.Modal(modalElement);
+    await loadModalProducts();
+    updateSelectedCount();
+    modal.show();
+};
 
