@@ -91,43 +91,6 @@ window.confirmProductSelection = function() {
     if (modal) modal.hide();
 };
 
-async function loadModalProducts() {
-    const productsContainer = document.getElementById('productsListContainer');
-    if (!productsContainer) return;
-
-    try {
-        productsContainer.innerHTML = '<div class="text-center">Carregando produtos...</div>';
-
-        const response = await fetch(`${MASTER_URL}/api/products`);
-        const data = await response.json();
-        
-        if (data.success) {
-            productsContainer.innerHTML = `
-                <div class="row g-3">
-                    ${data.products.map(product => `
-                        <div class="col-md-3">
-                            <div class="card h-100 ${window.selectedProducts.find(p => p.id === product.id) ? 'selected' : ''}"
-                                 onclick="toggleProductSelection(${JSON.stringify(product).replace(/"/g, '&quot;')})">
-                                <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
-                                     class="card-img-top p-2" alt="${product.name}">
-                                <div class="card-body">
-                                    <h6 class="card-title">${product.name}</h6>
-                                    <p class="card-text text-primary">${product.price}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-    } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
-        if (productsContainer) {
-            productsContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar produtos</div>';
-        }
-    }
-}
-
 window.openProductSelectionModal = async function() {
     const modalElement = document.getElementById('productSelectionModal');
     if (!modalElement) return;
@@ -2512,65 +2475,6 @@ window.openProductSelectionModal = async function() {
     modal.show();
 };
 
-async function loadModalProducts() {
-    try {
-        const productsContainer = document.getElementById('productsListContainer');
-        productsContainer.innerHTML = '<div class="w-100 text-center">Carregando produtos...</div>';
-
-        const response = await fetch(`${MASTER_URL}/api/products`);
-        const data = await response.json();
-        
-        if (data.success) {
-            productsContainer.innerHTML = '';
-            
-            // Agrupar produtos por categoria
-            const productsByCategory = data.products.reduce((acc, product) => {
-                if (!acc[product.category]) {
-                    acc[product.category] = [];
-                }
-                acc[product.category].push(product);
-                return acc;
-            }, {});
-
-            // Criar containers por categoria
-            Object.entries(productsByCategory).forEach(([category, products]) => {
-                const categorySection = document.createElement('div');
-                categorySection.className = 'category-section mb-4 w-100';
-                categorySection.innerHTML = `
-                    <h5 class="category-title mb-3">${category}</h5>
-                    <div class="row g-3 products-grid">
-                        ${products.map(product => `
-                            <div class="col-md-3">
-                                <div class="card h-100 product-card ${selectedProducts.find(p => p._id === product._id) ? 'selected' : ''}" 
-                                     onclick="toggleProductSelection(${JSON.stringify(product).replace(/"/g, '&quot;')})">
-                                    <img src="${product.imageUrl || '/default-product.png'}" 
-                                         class="card-img-top p-2" alt="${product.name}"
-                                         style="height: 200px; object-fit: contain;">
-                                    <div class="card-body">
-                                        <h6 class="card-title">${product.name}</h6>
-                                        <p class="card-text text-primary">${product.price}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent">
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" 
-                                                   ${selectedProducts.find(p => p._id === product._id) ? 'checked' : ''}>
-                                            <label class="form-check-label">Selecionar</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                productsContainer.appendChild(categorySection);
-            });
-        }
-    } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
-        document.getElementById('productsListContainer').innerHTML = 
-            '<div class="alert alert-danger">Erro ao carregar produtos</div>';
-    }
-}
 
 // Atualizar a função de filtro por categoria
 document.getElementById('searchByCategory').addEventListener('input', function(e) {
@@ -2791,44 +2695,6 @@ window.confirmProductSelection = function() {
     }
 };
 
-// Update the modal products loading function
-async function loadModalProducts() {
-    try {
-        const productsContainer = document.getElementById('productsListContainer');
-        if (!productsContainer) return;
-
-        productsContainer.innerHTML = '<div class="text-center">Carregando produtos...</div>';
-
-        const response = await fetch(`${MASTER_URL}/api/products`);
-        const data = await response.json();
-        
-        if (data.success) {
-            productsContainer.innerHTML = `
-                <div class="row g-3">
-                    ${data.products.map(product => `
-                        <div class="col-md-3">
-                            <div class="card h-100 ${selectedProducts.find(p => p.id === product.id) ? 'selected' : ''}"
-                                 onclick="toggleProductSelection(${JSON.stringify(product).replace(/"/g, '&quot;')})">
-                                <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
-                                     class="card-img-top p-2" alt="${product.name}">
-                                <div class="card-body">
-                                    <h6 class="card-title">${product.name}</h6>
-                                    <p class="card-text text-primary">${product.price}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-    } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
-        if (productsContainer) {
-            productsContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar produtos</div>';
-        }
-    }
-}
-
 // Update the modal open function
 window.openProductSelectionModal = async function() {
     const modalElement = document.getElementById('productSelectionModal');
@@ -2920,60 +2786,3 @@ window.toggleProductSelection = function(product) {
     updateSelectedCount();
     updateSelectedProductsPreview();
 };
-
-async function loadModalProducts() {
-    try {
-        const productsContainer = document.getElementById('productsListContainer');
-        if (!productsContainer) return;
-
-        productsContainer.innerHTML = '<div class="text-center">Carregando produtos...</div>';
-
-        const response = await fetch(`${MASTER_URL}/api/products`);
-        const data = await response.json();
-        
-        if (data.success) {
-            productsContainer.innerHTML = `
-                <div class="row g-3">
-                    ${data.products.map(product => `
-                        <div class="col-md-3">
-                            <div class="card h-100 ${window.selectedProducts?.find(p => p.id === product.id) ? 'selected' : ''}"
-                                 data-product-id="${product.id}"
-                                 onclick="toggleProductSelection(${JSON.stringify(product)})">
-                                <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
-                                     class="card-img-top p-2" alt="${product.name}">
-                                <div class="card-body">
-                                    <h6 class="card-title">${product.name}</h6>
-                                    <p class="card-text text-primary">${product.price}</p>
-                                </div>
-                                <div class="card-footer bg-transparent">
-                                    <div class="form-check">
-                                        <input type="checkbox" 
-                                               class="form-check-input" 
-                                               ${window.selectedProducts?.find(p => p.id === product.id) ? 'checked' : ''}
-                                               onclick="event.stopPropagation()">
-                                        <label class="form-check-label">Selecionar</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-
-            // Adicionar listeners para os checkboxes
-            document.querySelectorAll('.form-check-input').forEach(checkbox => {
-                checkbox.addEventListener('change', (e) => {
-                    const card = e.target.closest('.card');
-                    const productData = JSON.parse(card.getAttribute('onclick').split('toggleProductSelection(')[1].split(')')[0]);
-                    toggleProductSelection(productData);
-                });
-            });
-        }
-    } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
-        if (productsContainer) {
-            productsContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar produtos</div>';
-        }
-    }
-}
-
