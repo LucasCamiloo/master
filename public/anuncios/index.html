@@ -1298,15 +1298,37 @@
 
 <!-- ...existing code... -->
 
-<!-- Remover script duplicado do final e manter apenas este -->
+<!-- Remove script tag that redeclares MASTER_URL -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        loadExistingProducts();
-        toggleProduct(1);
-        toggleAdType('twoProducts');
-        loadSavedAds();
+        // Don't call functions directly, wait for master script to initialize
+        if (window.loadExistingProducts) {
+            loadExistingProducts();
+        }
+        if (window.toggleProduct) {
+            toggleProduct(1);
+        }
+        if (window.toggleAdType) {
+            toggleAdType('twoProducts');
+        }
+        if (window.loadSavedAds) {
+            loadSavedAds();
+        }
     });
 </script>
+
+<!-- ...existing code... -->
+
+<!-- Move these elements inside the form section where they belong -->
+<div id="twoProductsSection" class="form-section">
+    <input id="searchByCategory" type="text" placeholder="Filtrar por categoria" class="form-control mb-3" />
+    <button id="confirmSelection" class="btn btn-primary">Confirmar seleção</button>
+    <div id="product-content-1" style="display:none;"></div>
+    <div id="toggle-icon-1"></div>
+    <div id="productsListContainer" class="mt-3">
+        <!-- Products will be loaded here -->
+    </div>
+</div>
 
 <!-- ...existing code... -->
 <input id="searchByCategory" type="text" placeholder="Filtrar por categoria" />
