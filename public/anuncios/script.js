@@ -2609,29 +2609,29 @@ async function loadModalProducts() {
         const response = await fetch(`${MASTER_URL}/api/products`);
         const data = await response.json();
         
-        if (!data.success) {
-            throw new Error('Failed to load products');
-        }
+         if (!data.success) throw new Error('Failed to load products');
+
+        const container = document.getElementById('categorizedProducts');
+        if (!container) throw new Error('Container not found');
 
         // Group products by category
         const productsByCategory = data.products.reduce((acc, product) => {
             const category = product.category || 'Sem categoria';
-            if (!acc[category]) {
-                acc[category] = [];
-            }
+            if (!acc[category]) acc[category] = [];
             acc[category].push(product);
             return acc;
         }, {});
 
         // Update category filter
         const categoryFilter = document.getElementById('categoryFilter');
-        categoryFilter.innerHTML = '<option value="">Todas as categorias</option>' + 
-            Object.keys(productsByCategory).map(category => 
-                `<option value="${category}">${category}</option>`
-            ).join('');
+        if (categoryFilter) {
+            categoryFilter.innerHTML = '<option value="">Todas as categorias</option>' + 
+                Object.keys(productsByCategory).map(category => 
+                    `<option value="${category}">${category}</option>`
+                ).join('');
+        }
 
         // Render products by category
-        const container = document.getElementById('categorizedProducts');
         container.innerHTML = Object.entries(productsByCategory).map(([category, products]) => `
             <div class="category-section" data-category="${category}">
                 <div class="category-header">
@@ -2640,7 +2640,7 @@ async function loadModalProducts() {
                 <div class="row g-3">
                     ${products.map(product => `
                         <div class="col-md-3 col-sm-6">
-                            <div class="card h-100 product-card ${selectedProducts.find(p => p.id === product.id) ? 'selected' : ''}" 
+                            <div class="card h-100 product-card ${window.selectedProducts?.find(p => p.id === product.id) ? 'selected' : ''}" 
                                  onclick="toggleProductSelection(${JSON.stringify(product).replace(/"/g, '&quot;')})"
                                  data-product-id="${product.id}">
                                 <div class="selected-badge">Selecionado</div>
@@ -3155,3 +3155,90 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // ...existing code...
 
+// Carrega produtos por categoria e insere no modal
+async function loadModalProducts() {
+  try {
+    const response = await fetch(`${MASTER_URL}/api/products`);
+    if (!response.ok) throw new Error('Falha ao carregar produtos');
+    const data = await response.json();
+    if (!data.products) return;
+    const categorizedProductsContainer = document.getElementById('categorizedProducts');
+    if (!categorizedProductsContainer) return;
+
+    let html = '';
+    const categories = {};
+    data.products.forEach(prod => {
+      if (!categories[prod.category]) categories[prod.category] = [];
+      categories[prod.category].push(prod);
+    });
+    Object.keys(categories).forEach(cat => {
+      html += `<div class="category-section">
+        <h5 class="category-header">${cat}</h5>
+        <div class="row">`;
+      categories[cat].forEach(prod => {
+        html += `
+          <div class="col-md-3 mb-3">
+            <div class="position-relative product-card" data-id="${prod.id}" data-name="${prod.name}" data-img="${prod.imageUrl}">
+              <img src="${prod.imageUrl}" alt="${prod.name}" class="img-fluid" />
+              <span class="selected-badge">Selecionado</span>
+              <p>${prod.name}</p>
+            </div>
+          </div>`;
+      });
+      html += `</div></div>`;
+    });
+    categorizedProductsContainer.innerHTML = html;
+
+    // Evento de clique para selecionar produtos (limite de 2)
+    const productCards = document.querySelectorAll('.product-card');
+    productCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-id');
+        if (window.selectedProducts.length < 2 || card.classList.contains('selected')) {
+          card.classList.toggle('selected');
+          if (card.classList.contains('selected')) {
+            window.selectedProducts.push({
+              id,
+              name: card.getAttribute('data-name'),
+              imageUrl: card.getAttribute('data-img')
+            });
+          } else {
+            window.selectedProducts = window.selectedProducts.filter(p => p.id !== id);
+          }
+          document.getElementById('selectedCount').innerText = window.selectedProducts.length;
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Erro ao carregar produtos do modal:', error);
+  }
+}
+
+// Abrir modal de seleção de produtos e carregar automaticamente
+window.openProductSelectionModal = async function() {
+  window.selectedProducts = []; // resetar seleção
+  document.getElementById('selectedCount').innerText = '0';
+  await loadModalProducts();
+  const modal = new bootstrap.Modal(document.getElementById('productSelectionModal'), {});
+  modal.show();
+};
+
+// Confirmar e fechar o modal, exibindo produtos selecionados
+window.confirmProductSelection = function() {
+  // Exibir produtos selecionados no #selectedProducts
+  const container = document.getElementById('selectedProducts');
+  if (!container) return;
+  container.innerHTML = window.selectedProducts.map(prod => `
+    <div class="col-6 text-center mb-3">
+      <img src="${prod.imageUrl}" alt="${prod.name}" style="max-width: 100px;" />
+      <p>${prod.name}</p>
+    </div>
+  `).join('');
+
+  // Fechar modal
+  const modalEl = document.getElementById('productSelectionModal');
+  const modalInstance = bootstrap.Modal.getInstance(modalEl);
+  modalInstance?.hide();
+};
+
+// ...existing code...
