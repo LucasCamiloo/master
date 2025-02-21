@@ -2841,3 +2841,139 @@ window.openProductSelectionModal = async function() {
     modal.show();
 };
 
+window.toggleAdType = function(adType) {
+    console.log('Alterando tipo de anúncio para:', adType);
+    
+    const twoProductsSection = document.getElementById("twoProductsSection");
+    const productListSection = document.getElementById("productListSection");
+    const videoSection = document.getElementById("videoSection");
+    const backgroundSelect = document.getElementById("backgroundSelect");
+    
+    if (!twoProductsSection || !productListSection || !videoSection || !backgroundSelect) {
+        console.error('Elementos necessários não encontrados');
+        return;
+    }
+
+    // Atualizar botões
+    document.querySelectorAll('.ad-type-button').forEach(button => {
+        button.classList.remove('active');
+        if (button.getAttribute('data-ad-type') === adType) {
+            button.classList.add('active');
+        }
+    });
+
+    // Esconder todas as seções primeiro
+    twoProductsSection.style.display = "none";
+    productListSection.style.display = "none";
+    videoSection.style.display = "none";
+    backgroundSelect.closest('.form-section').style.display = "block";
+
+    // Mostrar apenas a seção apropriada
+    switch (adType) {
+        case "twoProducts":
+            twoProductsSection.style.display = "block";
+            updateBackgroundOptions("twoProducts");
+            break;
+        case "productList":
+            productListSection.style.display = "block";
+            updateBackgroundOptions("productList");
+            loadProductsForSelection();
+            break;
+        case "video":
+            videoSection.style.display = "block";
+            backgroundSelect.closest('.form-section').style.display = "none";
+            break;
+    }
+};
+
+window.toggleProductSelection = function(product) {
+    if (!window.selectedProducts) {
+        window.selectedProducts = [];
+    }
+
+    const index = window.selectedProducts.findIndex(p => p.id === product.id);
+    const cards = document.querySelectorAll(`.card[data-product-id="${product.id}"]`);
+    
+    if (index > -1) {
+        window.selectedProducts.splice(index, 1);
+        cards.forEach(card => {
+            card.classList.remove('selected');
+            const checkbox = card.querySelector('input[type="checkbox"]');
+            if (checkbox) checkbox.checked = false;
+        });
+    } else if (window.selectedProducts.length < 2) {
+        window.selectedProducts.push(product);
+        cards.forEach(card => {
+            card.classList.add('selected');
+            const checkbox = card.querySelector('input[type="checkbox"]');
+            if (checkbox) checkbox.checked = true;
+        });
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Limite atingido',
+            text: 'Você só pode selecionar até 2 produtos'
+        });
+        return;
+    }
+
+    updateSelectedCount();
+    updateSelectedProductsPreview();
+};
+
+async function loadModalProducts() {
+    try {
+        const productsContainer = document.getElementById('productsListContainer');
+        if (!productsContainer) return;
+
+        productsContainer.innerHTML = '<div class="text-center">Carregando produtos...</div>';
+
+        const response = await fetch(`${MASTER_URL}/api/products`);
+        const data = await response.json();
+        
+        if (data.success) {
+            productsContainer.innerHTML = `
+                <div class="row g-3">
+                    ${data.products.map(product => `
+                        <div class="col-md-3">
+                            <div class="card h-100 ${window.selectedProducts?.find(p => p.id === product.id) ? 'selected' : ''}"
+                                 data-product-id="${product.id}"
+                                 onclick="toggleProductSelection(${JSON.stringify(product)})">
+                                <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
+                                     class="card-img-top p-2" alt="${product.name}">
+                                <div class="card-body">
+                                    <h6 class="card-title">${product.name}</h6>
+                                    <p class="card-text text-primary">${product.price}</p>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <div class="form-check">
+                                        <input type="checkbox" 
+                                               class="form-check-input" 
+                                               ${window.selectedProducts?.find(p => p.id === product.id) ? 'checked' : ''}
+                                               onclick="event.stopPropagation()">
+                                        <label class="form-check-label">Selecionar</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            // Adicionar listeners para os checkboxes
+            document.querySelectorAll('.form-check-input').forEach(checkbox => {
+                checkbox.addEventListener('change', (e) => {
+                    const card = e.target.closest('.card');
+                    const productData = JSON.parse(card.getAttribute('onclick').split('toggleProductSelection(')[1].split(')')[0]);
+                    toggleProductSelection(productData);
+                });
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+        if (productsContainer) {
+            productsContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar produtos</div>';
+        }
+    }
+}
+
