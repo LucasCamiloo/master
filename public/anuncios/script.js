@@ -2373,28 +2373,6 @@ async function loadProductsGrid() {
         console.error('Erro ao carregar produtos:', error);
     }
 }
-window.toggleProductSelection = function(product) {
-    const index = window.selectedProducts.findIndex(p => p._id === product._id);
-    const card = document.querySelector(`.card[data-product-id="${product._id}"]`);
-    
-    if (index > -1) {
-        window.selectedProducts.splice(index, 1);
-        card.classList.remove('selected');
-    } else {
-        if (window.selectedProducts.length < 2) {
-            window.selectedProducts.push(product);
-            card.classList.add('selected');
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Limite atingido',
-                text: 'Você só pode selecionar até 2 produtos'
-            });
-        }
-    }
-    updateSelectedProductsPreview(); 
-    updateSelectedCount();
-};
 
 function updateSelectedProductsPreview() {
     const container = document.getElementById('selectedProducts');
@@ -2498,134 +2476,9 @@ document.getElementById('searchByCategory').addEventListener('input', function(e
     });
 });
 
-// ...existing code...
-
-// Atualizar a função de carregar produtos no modal
-async function loadModalProducts() {
-    try {
-        const productsContainer = document.getElementById('productsListContainer');
-        const categorySelect = document.getElementById('categorySelect');
-        productsContainer.innerHTML = '<div class="w-100 text-center">Carregando produtos...</div>';
-
-        const response = await fetch(`${MASTER_URL}/api/products`);
-        const data = await response.json();
-        
-        if (data.success) {
-            // Agrupar produtos por categoria
-            const productsByCategory = data.products.reduce((acc, product) => {
-                const category = product.category || 'Sem Categoria';
-                if (!acc[category]) {
-                    acc[category] = [];
-                }
-                acc[category].push(product);
-                return acc;
-            }, {});
-
-            // Atualizar select de categorias
-            const categories = Object.keys(productsByCategory);
-            categorySelect.innerHTML = `
-                <option value="all">Todas as Categorias</option>
-                ${categories.map(cat => `
-                    <option value="${cat}">${cat}</option>
-                `).join('')}
-            `;
-
-            // Função para renderizar produtos filtrados
-            function renderProducts(categoryFilter = 'all', searchTerm = '') {
-                productsContainer.innerHTML = '';
-                Object.entries(productsByCategory).forEach(([category, products]) => {
-                    if (categoryFilter === 'all' || categoryFilter === category) {
-                        // Filtrar produtos pelo termo de busca
-                        const filteredProducts = products.filter(product => 
-                            product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()))
-                        );
-
-                        if (filteredProducts.length > 0) {
-                            const categorySection = document.createElement('div');
-                            categorySection.className = 'category-section mb-4';
-                            categorySection.innerHTML = `
-                                <h5 class="category-title mb-3">${category}</h5>
-                                <div class="row g-3">
-                                    ${filteredProducts.map(product => `
-                                        <div class="col-md-3">
-                                            <div class="card h-100 product-card ${selectedProducts.find(p => p._id === product._id) ? 'selected' : ''}" 
-                                                 onclick="toggleProductSelection(${JSON.stringify(product).replace(/"/g, '&quot;')})">
-                                                <img src="${product.imageUrl || '/default-product.png'}" 
-                                                     class="card-img-top p-2" alt="${product.name}"
-                                                     style="height: 200px; object-fit: contain;">
-                                                <div class="card-body">
-                                                    <h6 class="card-title">${product.name}</h6>
-                                                    <p class="card-text text-primary">${product.price}</p>
-                                                </div>
-                                                <div class="card-footer bg-transparent">
-                                                    <div class="form-check">
-                                                        <input type="checkbox" class="form-check-input" 
-                                                               ${selectedProducts.find(p => p._id === product._id) ? 'checked' : ''}>
-                                                        <label class="form-check-label">Selecionar</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            `;
-                            productsContainer.appendChild(categorySection);
-                        }
-                    }
-                });
-            }
-
-            // Renderizar todos os produtos inicialmente
-            renderProducts();
-
-            // Adicionar listeners para filtros
-            categorySelect.addEventListener('change', () => {
-                const searchTerm = document.getElementById('searchByCategory').value;
-                renderProducts(categorySelect.value, searchTerm);
-            });
-
-            document.getElementById('searchByCategory').addEventListener('input', (e) => {
-                renderProducts(categorySelect.value, e.target.value);
-            });
-        }
-    } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
-        productsContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar produtos</div>';
-    }
-}
 
 window.selectedProducts = [];
 
-window.toggleProductSelection = function(product) {
-    // Find product in selection array
-    const index = selectedProducts.findIndex(p => p.id === product.id);
-    
-    // Find the card element
-    const card = document.querySelector(`.card[onclick*="${product.id}"]`);
-    
-    if (index > -1) {
-        // Remove if already selected
-        selectedProducts.splice(index, 1);
-        if (card) card.classList.remove('selected');
-    } else if (selectedProducts.length < 2) {
-        // Add if less than 2 products selected
-        selectedProducts.push(product);
-        if (card) card.classList.add('selected');
-    } else {
-        // Show error if trying to select more than 2
-        Swal.fire({
-            icon: 'error',
-            title: 'Limite atingido',
-            text: 'Você só pode selecionar até 2 produtos'
-        });
-        return;
-    }
-
-    // Update UI
-    updateSelectedCount();
-    updateSelectedPreview();
-};
 
 function updateSelectedCount() {
     const countElement = document.getElementById('selectedCount');
@@ -2752,37 +2605,60 @@ window.toggleAdType = function(adType) {
     }
 };
 
-window.toggleProductSelection = function(product) {
-    if (!window.selectedProducts) {
-        window.selectedProducts = [];
-    }
 
-    const index = window.selectedProducts.findIndex(p => p.id === product.id);
-    const cards = document.querySelectorAll(`.card[data-product-id="${product.id}"]`);
-    
-    if (index > -1) {
-        window.selectedProducts.splice(index, 1);
-        cards.forEach(card => {
-            card.classList.remove('selected');
-            const checkbox = card.querySelector('input[type="checkbox"]');
-            if (checkbox) checkbox.checked = false;
-        });
-    } else if (window.selectedProducts.length < 2) {
-        window.selectedProducts.push(product);
-        cards.forEach(card => {
-            card.classList.add('selected');
-            const checkbox = card.querySelector('input[type="checkbox"]');
-            if (checkbox) checkbox.checked = true;
-        });
-    } else {
-        Swal.fire({
-            icon: 'error',
-            title: 'Limite atingido',
-            text: 'Você só pode selecionar até 2 produtos'
-        });
-        return;
-    }
+async function loadModalProducts() {
+    try {
+        const productsContainer = document.getElementById('productsListContainer');
+        if (!productsContainer) return;
 
-    updateSelectedCount();
-    updateSelectedProductsPreview();
-};
+        productsContainer.innerHTML = '<div class="text-center">Carregando produtos...</div>';
+
+        const response = await fetch(`${MASTER_URL}/api/products`);
+        const data = await response.json();
+        
+        if (data.success) {
+            productsContainer.innerHTML = `
+                <div class="row g-3">
+                    ${data.products.map(product => `
+                        <div class="col-md-3">
+                            <div class="card h-100 ${window.selectedProducts?.find(p => p.id === product.id) ? 'selected' : ''}"
+                                 data-product-id="${product.id}"
+                                 onclick="toggleProductSelection(${JSON.stringify(product)})">
+                                <img src="${product.imageUrl || `${MASTER_URL}/default-product.png`}" 
+                                     class="card-img-top p-2" alt="${product.name}">
+                                <div class="card-body">
+                                    <h6 class="card-title">${product.name}</h6>
+                                    <p class="card-text text-primary">${product.price}</p>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <div class="form-check">
+                                        <input type="checkbox" 
+                                               class="form-check-input" 
+                                               ${window.selectedProducts?.find(p => p.id === product.id) ? 'checked' : ''}
+                                               onclick="event.stopPropagation()">
+                                        <label class="form-check-label">Selecionar</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            // Adicionar listeners para os checkboxes
+            document.querySelectorAll('.form-check-input').forEach(checkbox => {
+                checkbox.addEventListener('change', (e) => {
+                    const card = e.target.closest('.card');
+                    const productData = JSON.parse(card.getAttribute('onclick').split('toggleProductSelection(')[1].split(')')[0]);
+                    toggleProductSelection(productData);
+                });
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+        if (productsContainer) {
+            productsContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar produtos</div>';
+        }
+    }
+}
+
