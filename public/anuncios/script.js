@@ -13,15 +13,22 @@ function updateSelectedCount() {
 }
 
 window.toggleProductSelection = function(product) {
+    if (!window.selectedProducts) {
+        window.selectedProducts = [];
+    }
+
     const index = window.selectedProducts.findIndex(p => p.id === product.id);
-    const productCards = document.querySelectorAll(`.card[onclick*="${JSON.stringify(product).replace(/"/g, '&quot;')}"]`);
+    const checkbox = document.querySelector(`input[type="checkbox"][value="${product.id}"]`);
+    const card = checkbox?.closest('.card');
     
     if (index > -1) {
         window.selectedProducts.splice(index, 1);
-        productCards.forEach(card => card.classList.remove('selected'));
+        if (checkbox) checkbox.checked = false;
+        if (card) card.classList.remove('selected');
     } else if (window.selectedProducts.length < 2) {
         window.selectedProducts.push(product);
-        productCards.forEach(card => card.classList.add('selected'));
+        if (checkbox) checkbox.checked = true;
+        if (card) card.classList.add('selected');
     } else {
         Swal.fire({
             icon: 'error',
@@ -1481,23 +1488,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         productListSection.style.display = "none";
         videoSection.style.display = "none";
 
-        // Mostrar a seção apropriada
-        switch (adType) {
-            case "twoProducts":
-                twoProductsSection.style.display = "block";
-                backgroundSelect.closest('.form-section').style.display = "block";
-                updateBackgroundOptions("twoProducts");
-                break;
-            case "productList":
-                productListSection.style.display = "block";
-                backgroundSelect.closest('.form-section').style.display = "block";
-                updateBackgroundOptions("productList");
-                loadProductsForSelection();
-                break;
-            case "video":
-                videoSection.style.display = "block";
-                backgroundSelect.closest('.form-section').style.display = "none";
-                break;
+        // Mostrar a seção clicada
+        if (adType === "twoProducts") {
+            twoProductsSection.style.display = "block";
+            backgroundSelect.closest('.form-section').style.display = "block";
+            updateBackgroundOptions("twoProducts");
+        } else if (adType === "productList") {
+            productListSection.style.display = "block";
+            backgroundSelect.closest('.form-section').style.display = "block";
+            updateBackgroundOptions("productList");
+            loadProductsForSelection();
+        } else if (adType === "video") {
+            videoSection.style.display = "block";
+            backgroundSelect.closest('.form-section').style.display = "none";
         }
     }
 
