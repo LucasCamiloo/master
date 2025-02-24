@@ -160,40 +160,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // ...existing code...
 
-// Update loadExistingProducts function with better error handling
-async function loadExistingProducts() {
-    try {
-        const response = await fetch(`${MASTER_URL}/api/products`);
-        const data = await response.json();
-        
-        if (data.success && data.products) {
-            const allProducts = data.products;
-            
-            // Update product selects if they exist
-            const product1Select = getElement('product1Select');
-            const product2Select = getElement('product2Select');
-            
-            const options = allProducts.map(product => 
-                `<option value="${product.id}">${product.name}</option>`
-            ).join('');
-            
-            const defaultOption = '<option value="">Selecione um produto</option>';
-            
-            if (product1Select) {
-                product1Select.innerHTML = defaultOption + options;
-            }
-            if (product2Select) {
-                product2Select.innerHTML = defaultOption + options;
-            }
-            
-            return allProducts;
-        }
-        return [];
-    } catch (error) {
-        console.error('Error loading products:', error);
-        return [];
-    }
-}
 
 // ...existing code...
 
@@ -1520,27 +1486,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // Atualizar a função toggleProduct
-    function toggleProduct(number) {
-        const content = document.getElementById(`product-content-${number}`);
-        const icon = document.getElementById(`toggle-icon-${number}`);
-        const isExpanded = content.style.display === 'block';
-        
-        // Fechar todos os produtos primeiro
-        document.querySelectorAll('.product-content').forEach(el => {
-            el.style.display = 'none';
-        });
-        document.querySelectorAll('.toggle-icon').forEach(el => {
-            el.classList.remove('expanded');
-        });
-        
-        // Abrir o produto clicado se ele não estava expandido
-        if (!isExpanded) {
-            content.style.display = 'block';
-            icon.classList.add('expanded');
-        }
-    }
-
     // Inicializar estado dos produtos
     initializeProductState();
     
@@ -2833,17 +2778,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ...existing code...
 });
 
-async function loadExistingProducts() {
-    const container = document.getElementById('productsListContainer');
-    if (!container) {
-        console.error('productsListContainer element not found');
-        return;
-    }
-    // ...existing code...
-}
 
 // Remove any duplicate toggleProduct or loadExistingProducts definitions
-// ...existing code...
+
 
 // Add missing handleCategorySearch function
 function handleCategorySearch(event) {
